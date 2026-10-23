@@ -1,13 +1,13 @@
 """Cheat-assisted Monster Party (USA) coverage campaign on the cycle backend.
 
-Each round is played as one chain of deterministic headless segments: round
-select on the original ROUND START screen, a warp to every door of the round's
-door table, the guardian fight or room visit behind it, the walk back out, and
-finally the original round exit. Warps are journaled work-RAM fixtures
+Each round uses deterministic headless segments: round selection on the original
+ROUND START screen, visits to every room, independent maze branches from a
+recorded room checkpoint, and the original round exit. Optional encounters may
+branch from a naturally cleared checkpoint. Warps are journaled work-RAM fixtures
 (tools/cycstate.py); fights use the developer assists in mp_assist.c (life
-refill, guardians fall to the next landed hit). Every state the game reaches
-is reached through its own code: door transitions (7:D949), the area loader,
-guardian defeat (5:8D22) and the round-clear path (4:830A).
+refill, guardians fall to the next landed hit). Door transitions (7:D949), the
+area loader, guardian defeat (5:8D22) and round clear (4:830A) run the original
+code. Fixtures provide assisted setup, not unassisted traversal evidence.
 
   python tests/coverage/campaign.py --tag baseline [--rounds 1 2] [--parity]
 
@@ -17,6 +17,7 @@ state must match. Evidence lands in evidence/coverage/<tag>/ (gitignored).
 """
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -147,7 +148,6 @@ def play_round(n, args, root):
     # checkpoint, so each has a genuine room return and never requests a door
     # while unrelated live enemy tasks are left behind.
     doors.sort(key=lambda d: not is_room(d, area))
-    first_room = next(d for d in table if is_room(d, area))
     in_room = False
     room_checkpoint = None
     clear_checkpoint = None
@@ -156,8 +156,9 @@ def play_round(n, args, root):
         label = f'door{d["index"]:02d}'
         if how == 'up':
             before = chain.ram()
-            pad = '-' if n == 7 and d['row'] == 11 else 'A' if n == 7 and d['row'] == 0 else 'UP'
-            chain.seg(f'{label}-enter', 240, lambda f: [f'{f} {pad}', f'{f + 6} -'])
+            pad = 'DOWN' if n == 7 and d['row'] == 11 else 'UP'
+            held = 90 if n == 7 and d['row'] in (0,11) else 6
+            chain.seg(f'{label}-enter', 240, lambda f: [f'{f} {pad}', f'{f + held} -'])
         else:
             chain.fixture(label, warp_writes(d['world_x'][0], d['row'], True),
                           f'Round {n} door {d["index"]}: Mark at its table position, door request $53 (7:D949)')
@@ -168,21 +169,25 @@ def play_round(n, args, root):
     def visit_room(d, label):
         guard_before = chain.ram()[0x58]
         # 7:D99E: bit 7 of $52 names a guardian; round 6's single guardian room is content 0.
-        counted = bool(d['flag_52'] & 0x80) and (d['param_6C'] != 0 or area == 5) and guard_before > 0
-        frames = args.fight_frames if counted else 400
+        guardian = (d['flag_52'] >> 4) & 7
+        encounter = bool(d['flag_52'] & 0x80) and (d['param_6C'] != 0 or area == 5)
+        counted = encounter and guard_before > 0
+        frames = args.fight_frames if encounter else 400
         if n == 4 and d['param_6C'] == 1:
             chain.seg(f'{label}-dialog', 80, lambda f: [f'{f} A', f'{f+6} -', f'{f+40} A', f'{f+46} -'])
             chain.fixture(f'{label}-reflect-position', {0x03D6: 0xA0, 0x03CB: 0x94, 0x040D: 0},
                           'Stand beside the projectile boss to reflect its shots with real bat swings')
             frames = 2400
-        for k in range(args.fight_tries if counted else 1):
+        for k in range(args.fight_tries if encounter else 1):
             if n == 4 and d['param_6C'] == 1:
                 route = lambda f: sum(([f'{t} RIGHT B', f'{t+4} -'] for t in range(f, f+frames, 8)), [])
             else:
                 route = lambda f: mash(f, frames)
             r = chain.seg(f'{label}-room{k}', frames, route)
-            if r['ram'][0x58] < guard_before:
+            if encounter and r['ram'][0x59 + guardian] & 0x80:
                 break
+        if encounter and not (chain.ram()[0x59 + guardian] & 0x80):
+            raise SystemExit(f'round {n}: guardian {guardian} behind door {d["index"]} was not defeated')
         return counted
 
     for d in doors:
@@ -214,8 +219,12 @@ def play_round(n, args, root):
         if is_room(d, area):
             entered = now[0x4F] == d['dest_area']
         else:
-            entered = (now[0x4F] == area and now[0x50] == d['dest_6B'] and now[0x25] == d['dest_6E']
-                       and now[0x51] == d['param_6C'] and now[0x53] == 0)
+            # The camera can drift after arrival (e.g. a hit); the loader's
+            # destination/arrival registers retain the actual table dispatch.
+            entered = (now[0x4F] == area and now[0x6B] == d['dest_6B'] and now[0x6E] == d['dest_6E']
+                       and now[0x51] == d['param_6C'] and now[0x53] == 0
+                       and now[0x6F] == (d['arrival'] & 0xF0) + 4
+                       and now[0x70] == ((d['arrival'] << 4) + 8) & 0xFF)
         row = dict(door=d['index'], dest_area=d['dest_area'], guardian=d['guardian'], room=d['param_6C'],
                    reached_area=now[0x4F], entered=entered)
         if not entered:
@@ -283,7 +292,7 @@ def main():
     args.title_state = root / 'title-1000.cycstate'
     if not args.title_state.exists():
         r = mp_run.run(root, 'title', 1000, route=TITLE_ROUTE, assist=None, exe=args.exe)
-        Path(r['state']).replace(args.title_state)
+        shutil.copyfile(r['state'],args.title_state)
     summary = [play_round(n, args, root) for n in args.rounds]
     (root / f'summary-{"-".join(map(str, args.rounds))}.json').write_text(json.dumps(summary, indent=1) + '\n', newline='\n')
 

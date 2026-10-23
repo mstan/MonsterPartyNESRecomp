@@ -48,7 +48,7 @@
 #define PF_LINES 192          /* playfield lines; the status bar follows */
 #define STUB 0x0700           /* scratch CPU RAM for isolated bank-mapping stubs */
 #define MAX_PIECES 256
-#define MAX_REACH 430         /* widest margin (299) plus the largest object reach */
+#define MAX_REACH (CYC_VIDEO_MAX_WIDTH + 128) /* anchored views can put the whole margin on one side */
 
 enum { H_DRAW, H_OAM, H_DMA, H_SPAWN, H_CULL16, H_CULL64, H_COUNT };
 static const char *const hook_ids[H_COUNT] = {
@@ -230,7 +230,15 @@ static void latch_packets(void)
 }
 
 /* ---- viewport activation ---- */
-static int margin_left(void) { int w = cyc_video_width(); return w > 256 ? cyc_render_native_origin(w) : 0; }
+static int anchored_origin(int width, int cam, int lw);
+static int margin_left(void)
+{
+    int w = cyc_video_width();
+    if (w <= 256) return 0;
+    /* Simulation must not depend on whether the host composed a picture this
+     * frame (headless captures, skipped presentation, or a slow display). */
+    return anchored && scene() == SCENE_SCROLL ? anchored_origin(w, game_camera(), world_width()) : (w - 256) / 2;
+}
 static int margin_right(void) { int w = cyc_video_width(); return w > 256 ? w - 256 - margin_left() : 0; }
 
 static int spawn_index(int wx, int offset) { return ((((wx >> 8) + offset) & 0x0F) << 4) | ((wx & 0xFF) >> 4); }
@@ -485,7 +493,10 @@ static int render(uint32_t *out, int width, int height, int x0, const uint32_t *
 static void verify_map(void)
 {
     map_samples = map_errors = 0;
-    if (!enabled || scene() == SCENE_NONE) return;
+    /* Guardian rooms add speech windows and other authored overlays to their
+     * nametable. They present native pixels with backdrop margins, so those
+     * overlays are not terrain-decoder failures. */
+    if (!enabled || scene() == SCENE_NONE || R(0x4F) >= 8) return;
     Level l;
     if (!level_now(&l)) return;
     int cam = unwrap(cyc_render_line_scroll_x(80), game_camera(), 512);

@@ -1,7 +1,8 @@
 """Read and fixture cartridge CYCSTATE save states (engine runner/cyc/cyc_state.c).
 
 Offsets are qualified for the pinned engine's MSVC x64 HwMachine layout and
-re-checked against --mem-out by tests/coverage/check_state_layout.py. A fixture
+were checked against --mem-out during bring-up. The chunk-length guard below
+rejects other layouts. A fixture
 writes only CPU work RAM and journals every changed byte beside the new state;
 it never patches guest code.
 """

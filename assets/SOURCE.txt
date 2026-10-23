@@ -1,0 +1,5 @@
+Monster Party North American package artwork, copyright Bandai.
+Source: https://strategywiki.org/wiki/Monster_Party
+Image: https://cdn.wikimg.net/en/strategywiki/images/e/e1/Monster_Party_cover.jpg
+Retrieved 2026-10-23. Converted without content changes to RGB TGA for recomp-ui.
+Used as the game's identifying launcher artwork; no ROM is included.

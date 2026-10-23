@@ -1,0 +1,29 @@
+# --- Build output ---
+build*/
+release/
+
+# --- Copyrighted game data (NEVER commit) ---
+# The ROM, extracted banks, saves and archives must be supplied locally.
+*.nes
+*.NES
+*.zip
+banks/
+*.bin
+*.sav
+*.srm
+*.cycstate
+*.state
+saves/
+
+# --- Ghidra workspace: the .rep databases embed ROM bytes ---
+ghidra/*.gpr
+ghidra/*.rep/
+ghidra/*.lock*
+
+# --- Logs, evidence and transient runtime artifacts ---
+*.log
+generated/
+evidence/
+coverage-evidence/
+wide-evidence/
+__pycache__/

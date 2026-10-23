@@ -1,0 +1,9 @@
+# game.toml — Monster Party (USA) (NES, Mapper 1 / MMC1, 128KB PRG / 128KB CHR)
+#
+# Mapper / PRG / CHR sizes are read from the iNES header automatically; only
+# output_prefix names the generated files. Entry points reached through RTS or
+# JMP-indirect dispatch come from cyc_seeds.txt (harvested --miss-log runs).
+
+[game]
+name = "Monster Party"
+output_prefix = "monster-party"

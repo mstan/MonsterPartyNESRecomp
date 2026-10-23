@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(MonsterPartyRecomp C CXX)
+set(NESRECOMP_BACKEND "cycle" CACHE STRING "Execution backend (cycle only)")
+if(NOT NESRECOMP_BACKEND STREQUAL "cycle")
+    message(FATAL_ERROR "Monster Party uses the cycle backend")
+endif()
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -32,7 +36,8 @@ nesrecomp_add_cycle_game(MonsterPartyRecomp
     RECOMPILER "${NESRECOMP_HOST_COMPILER}"
     SEED_FILE "${NESRECOMP_CYCLE_SEEDS}"
     MODS GAME_ID "monster-party-usa"
-    HOST_EXTRAS mp_host.c mp_assist.c
+    HOST_EXTRAS mp_host.c mp_assist.c mp_widescreen.c
+    BOXART "${CMAKE_CURRENT_SOURCE_DIR}/assets/boxart.tga"
     PLAYERS 1 REGION NTSC)
 target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 add_custom_command(TARGET MonsterPartyRecomp POST_BUILD

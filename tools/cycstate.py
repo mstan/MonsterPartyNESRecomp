@@ -1,7 +1,8 @@
 """Read and fixture cartridge CYCSTATE save states (engine runner/cyc/cyc_state.c).
 
 Offsets are qualified for the pinned engine's MSVC x64 HwMachine layout and
-re-checked against --mem-out by tests/coverage/check_state_layout.py. A fixture
+were checked against --mem-out during bring-up. The chunk-length guard below
+rejects other layouts. A fixture
 writes only CPU work RAM and journals every changed byte beside the new state;
 it never patches guest code.
 """
@@ -65,5 +66,5 @@ def fixture(source, destination, writes, purpose):
     destination.with_suffix('.fixture.json').write_text(json.dumps(dict(
         source=str(source.resolve()), source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         fixture_sha256=hashlib.sha256(data).hexdigest(), purpose=purpose, changes=changes,
-        evidence_scope='Assisted setup; not an unassisted traversal or victory.'), indent=2) + '\n')
+        evidence_scope='Assisted setup; not an unassisted traversal or victory.'), indent=2) + '\n', newline='\n')
     return destination

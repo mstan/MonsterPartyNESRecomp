@@ -1,13 +1,13 @@
 """Cheat-assisted Monster Party (USA) coverage campaign on the cycle backend.
 
-Each round is played as one chain of deterministic headless segments: round
-select on the original ROUND START screen, a warp to every door of the round's
-door table, the guardian fight or room visit behind it, the walk back out, and
-finally the original round exit. Warps are journaled work-RAM fixtures
+Each round uses deterministic headless segments: round selection on the original
+ROUND START screen, visits to every room, independent maze branches from a
+recorded room checkpoint, and the original round exit. Optional encounters may
+branch from a naturally cleared checkpoint. Warps are journaled work-RAM fixtures
 (tools/cycstate.py); fights use the developer assists in mp_assist.c (life
-refill, guardians fall to the next landed hit). Every state the game reaches
-is reached through its own code: door transitions (7:D949), the area loader,
-guardian defeat (5:8D22) and the round-clear path (4:830A).
+refill, guardians fall to the next landed hit). Door transitions (7:D949), the
+area loader, guardian defeat (5:8D22) and round clear (4:830A) run the original
+code. Fixtures provide assisted setup, not unassisted traversal evidence.
 
   python tests/coverage/campaign.py --tag baseline [--rounds 1 2] [--parity]
 
@@ -17,6 +17,7 @@ state must match. Evidence lands in evidence/coverage/<tag>/ (gitignored).
 """
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -29,7 +30,7 @@ import mp_run  # noqa: E402
 
 GUARDS = [3, 3, 3, 3, 2, 1, 2, 3]       # 4:$945B, guardians each round needs
 TITLE_ROUTE = '0 -\n300 START\n306 -\n500 START\n506 -\n'
-WATCH = (0x97, 0x4F, 0x6A, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x9E, 0x032F, 0x50, 0x25, 0x03CB, 0x03D6)
+WATCH = (0x97, 0x4F, 0x6A, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x9E, 0x032F, 0x50, 0x51, 0x25, 0x52, 0x53, 0x03CB, 0x03D6)
 
 
 class Chain:
@@ -46,18 +47,29 @@ class Chain:
         route = '\n'.join(route_fn(first)) if route_fn else ''
         name = f'{self.n:03d}-{label}'
         self.n += 1
-        r = mp_run.run(self.out, name, frames, state=self.state, route=route, assist=assist, pokes=pokes)
+        extra = list(getattr(self.args, 'extra', ()))
+        if getattr(self.args, 'widescreen', None):
+            extra += ['--widescreen', self.args.widescreen, '--present-out', str(self.out / f'{name}.present.png')]
+        exe = getattr(self.args, 'exe', mp_run.EXE)
+        r = mp_run.run(self.out, name, frames, state=self.state, route=route, assist=assist, pokes=pokes, extra=extra, exe=exe)
         row = dict(segment=name, first=first, end=r['end'], ram={f'{a:04X}': r['ram'][a] for a in WATCH},
-                   start_state=str(self.state) if self.state else None)
+                   start_state=str(self.state) if self.state else None,
+                   cycles=r['cycles'], native_cycles=r['native'], interpreted_rom_cycles=r['interp_rom'])
         if self.args.parity:
+            iextra = list(getattr(self.args, 'extra', ()))
+            if getattr(self.args, 'widescreen', None):
+                iextra += ['--widescreen', self.args.widescreen, '--present-out', str(self.out / 'interp' / f'{name}.present.png')]
             i = mp_run.run(self.out / 'interp', name, frames, state=self.state, route=route, assist=assist,
-                           pokes=pokes, interp=True)
+                           pokes=pokes, interp=True, extra=iextra, exe=exe)
             row['parity'] = {ext: Path(r['state']).with_suffix(ext).read_bytes() ==
                              Path(i['state']).with_suffix(ext).read_bytes() for ext in ('.hash', '.png', '.cycstate')}
+            if getattr(self.args, 'widescreen', None):
+                row['parity']['.present.png'] = (self.out / f'{name}.present.png').read_bytes() == (self.out / 'interp' / f'{name}.present.png').read_bytes()
             if not all(row['parity'].values()):
                 raise SystemExit(f'{self.name} {name}: native/interpreter mismatch {row["parity"]}')
         self.log.append(row)
         self.state = Path(r['state'])
+        self.checkpoint()
         mp_run.show(r, 0x4F, 0x6A, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x50, 0x25, 0x3CB, 0x3D6)
         return r
 
@@ -67,6 +79,10 @@ class Chain:
         cycstate.fixture(self.state, dest, writes, purpose)
         self.log.append(dict(fixture=dest.name, writes={f'{a:04X}': v for a, v in writes.items()}, purpose=purpose))
         self.state = dest
+        self.checkpoint()
+
+    def checkpoint(self):
+        (self.out / 'segments.json').write_text(json.dumps(self.log, indent=1) + '\n', newline='\n')
 
     def ram(self):
         return cycstate.ram(Path(self.state).read_bytes())
@@ -93,14 +109,17 @@ def warp_writes(world_x, row, request_door):
 
 def leave(chain, label):
     """Walking off the room's left edge takes its return door (area 8-15 tables)."""
-    chain.seg(f'{label}-leave', 300, lambda f: [f'{f} LEFT', f'{f + 150} -'])
+    hold = chain.ram()[0x03D6] + 12
+    chain.seg(f'{label}-leave', hold + 150, lambda f: [f'{f} LEFT', f'{f + hold} -'])
 
 
-def return_point(chain, label, world_x, row, purpose):
+def return_point(chain, label, world_x, row, purpose, segmented=False):
     """Inside a room: move the game's saved return point ($75-$7A, stored by
     7:D9DC) so that walking out redraws the round with Mark at world_x/row."""
-    cam = max(0, min(world_x - 0x80, 0xF00))
-    chain.fixture(label, {0x76: cam >> 8, 0x78: cam & 0xFF, 0x79: row * 16 + 4, 0x7A: (world_x - cam + 8) & 0xFF},
+    offset = world_x >> 8 if segmented else 0
+    local_x = world_x - offset * 256
+    cam = 0 if segmented else max(0, min(world_x - 0x80, 0xF00))
+    chain.fixture(label, {0x76: cam >> 8, 0x77: offset, 0x78: cam & 0xFF, 0x79: row * 16 + 4, 0x7A: (local_x - cam + 8) & 0xFF},
                   purpose)
 
 
@@ -125,52 +144,87 @@ def play_round(n, args, root):
     exit_row, exit_x = max((r, x) for k, r, x in mp_map.find(start_state, kinds=(7,)))
     table = mp_doors.areas()[area]['doors']
     doors = [d for d in table if not args.doors or d['index'] in args.doors]
-    first_room = next(d for d in table if is_room(d, area))
+    # Clear the rooms first. In-area maze cases branch from the resulting room
+    # checkpoint, so each has a genuine room return and never requests a door
+    # while unrelated live enemy tasks are left behind.
+    doors.sort(key=lambda d: not is_room(d, area))
     in_room = False
+    room_checkpoint = None
+    clear_checkpoint = None
 
     def enter(d, how):
         label = f'door{d["index"]:02d}'
         if how == 'up':
-            chain.seg(f'{label}-enter', 240, lambda f: [f'{f + 20} UP', f'{f + 26} -'])
+            before = chain.ram()
+            pad = 'DOWN' if n == 7 and d['row'] == 11 else 'UP'
+            held = 90 if n == 7 and d['row'] in (0,11) else 6
+            chain.seg(f'{label}-enter', 240, lambda f: [f'{f} {pad}', f'{f + held} -'])
         else:
             chain.fixture(label, warp_writes(d['world_x'][0], d['row'], True),
                           f'Round {n} door {d["index"]}: Mark at its table position, door request $53 (7:D949)')
+            before = chain.ram()
             chain.seg(f'{label}-enter', 240)
+        return before
 
     def visit_room(d, label):
         guard_before = chain.ram()[0x58]
         # 7:D99E: bit 7 of $52 names a guardian; round 6's single guardian room is content 0.
-        counted = bool(d['flag_52'] & 0x80) and (d['param_6C'] != 0 or area == 5) and guard_before > 0
-        frames = args.fight_frames if counted else 400
-        for k in range(args.fight_tries if counted else 1):
-            r = chain.seg(f'{label}-room{k}', frames, lambda f: mash(f, frames))
-            if r['ram'][0x58] < guard_before:
+        guardian = (d['flag_52'] >> 4) & 7
+        encounter = bool(d['flag_52'] & 0x80) and (d['param_6C'] != 0 or area == 5)
+        counted = encounter and guard_before > 0
+        frames = args.fight_frames if encounter else 400
+        if n == 4 and d['param_6C'] == 1:
+            chain.seg(f'{label}-dialog', 80, lambda f: [f'{f} A', f'{f+6} -', f'{f+40} A', f'{f+46} -'])
+            chain.fixture(f'{label}-reflect-position', {0x03D6: 0xA0, 0x03CB: 0x94, 0x040D: 0},
+                          'Stand beside the projectile boss to reflect its shots with real bat swings')
+            frames = 2400
+        for k in range(args.fight_tries if encounter else 1):
+            if n == 4 and d['param_6C'] == 1:
+                route = lambda f: sum(([f'{t} RIGHT B', f'{t+4} -'] for t in range(f, f+frames, 8)), [])
+            else:
+                route = lambda f: mash(f, frames)
+            r = chain.seg(f'{label}-room{k}', frames, route)
+            if encounter and r['ram'][0x59 + guardian] & 0x80:
                 break
+        if encounter and not (chain.ram()[0x59 + guardian] & 0x80):
+            raise SystemExit(f'round {n}: guardian {guardian} behind door {d["index"]} was not defeated')
         return counted
 
     for d in doors:
-        here = chain.ram()
         label = f'door{d["index"]:02d}'
+        if not in_room and room_checkpoint:
+            source = clear_checkpoint or room_checkpoint
+            chain.log.append(dict(branch=str(source), purpose='Independent maze case from the room checkpoint'))
+            chain.state = source
+            in_room = True
         if in_room:
             return_point(chain, f'{label}-return-point', d['world_x'][0], d['row'],
-                         f'Round {n}: walk out of the room in front of door {d["index"]}')
+                         f'Round {n}: walk out of the room in front of door {d["index"]}', segmented=n == 7)
             leave(chain, label)
             back = chain.ram()
             if back[0x4F] != area:
                 raise SystemExit(f'round {n}: walking out did not return to area {area}')
             # Mark keeps walking while LEFT is still held after the redraw; put
             # him back on the door column (screen X only, camera untouched).
-            cam = (back[0x50] << 8) | back[0x25]
-            chain.fixture(f'{label}-nudge', {0x03D6: (d['world_x'][0] - cam + 8) & 0xFF, 0x03CB: d['row'] * 16 + 4},
+            cam = ((back[0x50] + back[0x51]) << 8) | back[0x25]
+            writes = {0x03D6: (d['world_x'][0] - cam + 8) & 0xFF, 0x03CB: d['row'] * 16 + 4}
+            if n == 7 and d['row'] == 11:
+                writes.update({0x03CB: 0xAF, 0x0330: back[0x0330] & ~2, 0x036C: 0})
+            chain.fixture(f'{label}-nudge', writes,
                           f'Round {n}: Mark back onto door {d["index"]} column after walking out')
-            enter(d, 'up')
+            here = enter(d, 'up')
         else:
-            enter(d, 'warp')
+            here = enter(d, 'warp')
         now = chain.ram()
         if is_room(d, area):
             entered = now[0x4F] == d['dest_area']
         else:
-            entered = (now[0x50], now[0x25], now[0x3CB]) != (here[0x50], here[0x25], here[0x3CB])
+            # The camera can drift after arrival (e.g. a hit); the loader's
+            # destination/arrival registers retain the actual table dispatch.
+            entered = (now[0x4F] == area and now[0x6B] == d['dest_6B'] and now[0x6E] == d['dest_6E']
+                       and now[0x51] == d['param_6C'] and now[0x53] == 0
+                       and now[0x6F] == (d['arrival'] & 0xF0) + 4
+                       and now[0x70] == ((d['arrival'] << 4) + 8) & 0xFF)
         row = dict(door=d['index'], dest_area=d['dest_area'], guardian=d['guardian'], room=d['param_6C'],
                    reached_area=now[0x4F], entered=entered)
         if not entered:
@@ -178,19 +232,43 @@ def play_round(n, args, root):
         in_room = now[0x4F] != area
         if in_room:
             row['counted'] = visit_room(d, label)
+            room_checkpoint = chain.state
+            if chain.ram()[0x58] == 0:
+                clear_checkpoint = chain.state
         row['guardians_left'] = chain.ram()[0x58]
         results['doors'].append(row)
     if args.clear:
+        if clear_checkpoint:
+            chain.log.append(dict(branch=str(clear_checkpoint), purpose='Exit from a naturally cleared room checkpoint; optional encounter branches remain separate'))
+            chain.state = clear_checkpoint
+            in_room = True
         if chain.ram()[0x58]:
             raise SystemExit(f'round {n}: {chain.ram()[0x58]} guardians left before the exit; not forcing it')
         if not in_room:
-            enter(first_room, 'warp')
-            visit_room(first_room, 'exit-room')
+            if not room_checkpoint:
+                raise SystemExit(f'round {n}: no room checkpoint for exit setup')
+            chain.log.append(dict(branch=str(room_checkpoint), purpose='Return to cleared room for round-exit case'))
+            chain.state = room_checkpoint
         return_point(chain, 'exit-return-point', exit_x, exit_row,
-                     f'Round {n}: walk out of the room in front of the round exit')
+                     f'Round {n}: walk out of the room in front of the round exit', segmented=n == 7)
         leave(chain, 'exit')
-        r = chain.seg('exit', 900, lambda f: [f'{f + 20} UP', f'{f + 26} -', f'{f + 400} START', f'{f + 406} -'])
+        back = chain.ram()
+        cam = ((back[0x50] + back[0x51]) << 8) | back[0x25]
+        chain.fixture('exit-nudge', {0x03D6: (exit_x - cam + 8) & 0xFF, 0x03CB: exit_row * 16 + 4},
+                      f'Round {n}: Mark back onto the round exit column after walking out')
+        r = chain.seg('exit', 900, lambda f: [f'{f} UP', f'{f + 6} -'])
         results['after_exit'] = dict(round=r['ram'][0x97] + 1, area=r['ram'][0x4F], guardians=r['ram'][0x58])
+        if n < 8 and r['ram'][0x97] != n:
+            raise SystemExit(f'round {n}: exit did not advance to round {n + 1}: {results["after_exit"]}')
+        if n < 8:
+            # One START dismisses the password, another starts the round card.
+            for attempt in range(3):
+                r = chain.seg(f'next-round{attempt}', 500, lambda f: [f'{f + 20} START', f'{f + 26} -'])
+                if r['ram'][0x4F] == n and r['ram'][0x58] == GUARDS[n]:
+                    break
+            results['next_round'] = dict(round=r['ram'][0x97] + 1, area=r['ram'][0x4F], guardians=r['ram'][0x58])
+            if r['ram'][0x4F] != n or r['ram'][0x58] != GUARDS[n]:
+                raise SystemExit(f'round {n}: next-round initialization failed: {results["next_round"]}')
     (chain.out / 'chain.json').write_text(json.dumps(dict(results=results, segments=chain.log), indent=1) + '\n', newline='\n')
     print(json.dumps(results))
     return results
@@ -205,13 +283,16 @@ def main():
     ap.add_argument('--clear', action='store_true', help='exit through the original round exit after the last door')
     ap.add_argument('--fight-frames', type=int, default=1200)
     ap.add_argument('--fight-tries', type=int, default=4)
+    ap.add_argument('--output', type=Path, help='evidence root (default: evidence/coverage/TAG)')
+    ap.add_argument('--exe', type=Path, default=mp_run.EXE)
+    ap.add_argument('--widescreen', choices=('16:9', '21:9', '32:9', 'fit'))
     args = ap.parse_args()
-    root = ROOT / 'evidence' / 'coverage' / args.tag
+    root = args.output.resolve() if args.output else ROOT / 'evidence' / 'coverage' / args.tag
     root.mkdir(parents=True, exist_ok=True)
     args.title_state = root / 'title-1000.cycstate'
     if not args.title_state.exists():
-        r = mp_run.run(root, 'title', 1000, route=TITLE_ROUTE, assist=None)
-        Path(r['state']).replace(args.title_state)
+        r = mp_run.run(root, 'title', 1000, route=TITLE_ROUTE, assist=None, exe=args.exe)
+        shutil.copyfile(r['state'],args.title_state)
     summary = [play_round(n, args, root) for n in args.rounds]
     (root / f'summary-{"-".join(map(str, args.rounds))}.json').write_text(json.dumps(summary, indent=1) + '\n', newline='\n')
 

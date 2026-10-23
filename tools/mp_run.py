@@ -36,12 +36,20 @@ def run(out, name, frames, state=None, route='', assist=None, pokes=(), shots=0,
         harvest=True, extra=(), exe=EXE, rom=ROM, timeout=1800):
     """frames: how many frames to run from the state. Returns a result dict."""
     out = Path(out)
+    out = out.resolve()
+    if out.drive.upper() == 'C:':
+        raise ValueError('headless evidence and runtime scratch must be on F: or G:')
     out.mkdir(parents=True, exist_ok=True)
+    scratch = out / '.tmp'
+    scratch.mkdir(exist_ok=True)
+    env = dict(ENV, TEMP=str(scratch), TMP=str(scratch), XDG_CACHE_HOME=str(out / '.cache'), XDG_DATA_HOME=str(out / '.data'))
     first = start_frame(state)
     end = first + frames
     stem = out / name
+    if state and Path(state).resolve() == stem.with_suffix('.cycstate').resolve():
+        raise ValueError('segment output must not overwrite its input state')
     route_path = stem.with_suffix('.route.txt')
-    route_path.write_text(route if route.endswith('\n') or not route else route + '\n')
+    route_path.write_text(route if route.endswith('\n') or not route else route + '\n', newline='\n')
     cmd = [str(exe), str(rom), '--no-save', '--frames', str(end),
            '--hash-out', str(stem.with_suffix('.hash')), '--screenshot', str(stem.with_suffix('.png')),
            '--save-state', f'{end - 1}:{stem.with_suffix(".cycstate")}']
@@ -60,10 +68,10 @@ def run(out, name, frames, state=None, route='', assist=None, pokes=(), shots=0,
     elif harvest:
         cmd += ['--miss-log', str(out / 'misses.txt'), '--capture-log', str(out / 'captures.txt')]
     cmd += list(extra)
-    stem.with_suffix('.command.json').write_text(json.dumps(cmd, indent=2) + '\n')
+    stem.with_suffix('.command.json').write_text(json.dumps(cmd, indent=2) + '\n', newline='\n')
     log = stem.with_suffix('.log')
-    with log.open('w') as f:
-        proc = subprocess.run(cmd, cwd=out, stdout=f, stderr=subprocess.STDOUT, env=ENV, timeout=timeout,
+    with log.open('w', newline='\n') as f:
+        proc = subprocess.run(cmd, cwd=out, stdout=f, stderr=subprocess.STDOUT, env=env, timeout=timeout,
                               creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     text = log.read_text(errors='replace')
     if proc.returncode:

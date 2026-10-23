@@ -41,7 +41,7 @@ def run(out, name, frames, state=None, route='', assist=None, pokes=(), shots=0,
     end = first + frames
     stem = out / name
     route_path = stem.with_suffix('.route.txt')
-    route_path.write_text(route if route.endswith('\n') or not route else route + '\n')
+    route_path.write_text(route if route.endswith('\n') or not route else route + '\n', newline='\n')
     cmd = [str(exe), str(rom), '--no-save', '--frames', str(end),
            '--hash-out', str(stem.with_suffix('.hash')), '--screenshot', str(stem.with_suffix('.png')),
            '--save-state', f'{end - 1}:{stem.with_suffix(".cycstate")}']
@@ -60,9 +60,9 @@ def run(out, name, frames, state=None, route='', assist=None, pokes=(), shots=0,
     elif harvest:
         cmd += ['--miss-log', str(out / 'misses.txt'), '--capture-log', str(out / 'captures.txt')]
     cmd += list(extra)
-    stem.with_suffix('.command.json').write_text(json.dumps(cmd, indent=2) + '\n')
+    stem.with_suffix('.command.json').write_text(json.dumps(cmd, indent=2) + '\n', newline='\n')
     log = stem.with_suffix('.log')
-    with log.open('w') as f:
+    with log.open('w', newline='\n') as f:
         proc = subprocess.run(cmd, cwd=out, stdout=f, stderr=subprocess.STDOUT, env=ENV, timeout=timeout,
                               creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
     text = log.read_text(errors='replace')

@@ -65,5 +65,5 @@ def fixture(source, destination, writes, purpose):
     destination.with_suffix('.fixture.json').write_text(json.dumps(dict(
         source=str(source.resolve()), source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         fixture_sha256=hashlib.sha256(data).hexdigest(), purpose=purpose, changes=changes,
-        evidence_scope='Assisted setup; not an unassisted traversal or victory.'), indent=2) + '\n')
+        evidence_scope='Assisted setup; not an unassisted traversal or victory.'), indent=2) + '\n', newline='\n')
     return destination

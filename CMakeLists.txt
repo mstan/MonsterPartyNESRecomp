@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(MonsterPartyRecomp VERSION 0.1.0 LANGUAGES C CXX)
+project(MonsterPartyRecomp VERSION 0.1.1 LANGUAGES C CXX)
 set(NESRECOMP_GAME_VERSION "${PROJECT_VERSION}" CACHE STRING "Game release version")
 set(NESRECOMP_BACKEND "cycle" CACHE STRING "Execution backend (cycle only)")
 if(NOT NESRECOMP_BACKEND STREQUAL "cycle")

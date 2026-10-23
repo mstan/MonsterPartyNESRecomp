@@ -148,6 +148,28 @@ Evidence is in `G:/Temp/Codex/MonsterPartyNESRecomp/release-010-evidence/`.
 The release archives contain player instructions, launcher artwork and notices,
 with no ROMs, player files, test renderers or loading-speed mod packages.
 
+## Save states and rewind (0.1.1)
+
+The shared cycle desktop host now provides the F7 twelve-slot browser and F8
+rewind filmstrip. The history uses rbengine's snapshot ring; recomp-net SHA1
+binds each thumbnail to its saved machine blob. History is bounded to 128 MiB
+of blobs, with launcher controls for depth and capture interval. Rewinding
+discards the abandoned future; loading a disk slot or changing mods clears
+the old history. Online sessions reject local state changes.
+
+`tests/state_ui.py` drives real key and virtual-controller events in a hidden,
+silent SDL window. Windows and Ubuntu 22.04 native/interpreter 32:9 checks cover
+whole-machine save equality, invalid-load rejection without mutation, modal
+pause, controller save/load, held-load input suppression, non-destructive
+rewind scrubbing, future truncation and persistence across restart. The stock
+aspect also passes the Windows interface checks. Shared `cyc_input_test` and
+`cyc_window_run` pass, including settings persistence and legacy-binding
+collision coverage. All eight rounds pass the 240-frame widescreen parity and
+mid-route save/replay matrix (80 checks).
+
+Evidence is retained under `G:/Temp/Codex/MonsterPartyNESRecomp/state-ui/`.
+Older snapshots remain build-specific; no migration is required or promised.
+
 ## Evidence
 
 The main evidence root is `G:/Temp/Codex/MonsterPartyNESRecomp/`:

@@ -1,7 +1,7 @@
 # Monster Party Recompiled
 
 Play **Monster Party** on Windows and Linux with adaptive widescreen, controller
-support, and a modern launcher. Join Mark and Bert for the original eight-round
+support, save states, rewind, and a modern launcher. Join Mark and Bert for the original eight-round
 adventure.
 
 ## Download and play
@@ -43,10 +43,19 @@ Keyboard and controller bindings can be changed in the launcher.
 | A / B | Z / X |
 | Start / Select | Enter / Backslash |
 | Menu | Escape |
-| Quick save / load | F8 / F9 |
+| Save-state browser | F7 |
+| Rewind | F8 |
+
+**F7** opens twelve save slots with thumbnail previews. Choose a slot, press
+**S** to save or **Enter** to load. On a controller, use **Back + L3** to open
+the browser, **X** to save, **A** to load, and **B** to close.
+
+**F8** opens rewind. Use **Left / Right** to choose an earlier moment, then
+**Enter / A** to resume there. **Escape / B** cancels. The controller shortcut
+is **Back + R3**. Rewind starts enabled; its history settings are in the launcher.
 
 Keep the game's passwords for progress you want to carry into an update.
-Quick saves are specific to a build and may not carry between releases.
+Save states are specific to a build and may not carry between releases.
 Windows keeps settings beside the program. Linux keeps them in your user data
 folder (`~/.local/share/MonsterParty` by default).
 
@@ -59,8 +68,8 @@ A screenshot is helpful.
 If Linux reports that FUSE is unavailable, run the AppImage with:
 
 ```sh
-chmod +x MonsterParty-0.1.0-linux-x86_64.AppImage
-./MonsterParty-0.1.0-linux-x86_64.AppImage --appimage-extract-and-run
+chmod +x MonsterParty-0.1.1-linux-x86_64.AppImage
+./MonsterParty-0.1.1-linux-x86_64.AppImage --appimage-extract-and-run
 ```
 
 For source builds, see the [build guide](docs/BUILDING.md).

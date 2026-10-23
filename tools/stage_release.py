@@ -19,6 +19,8 @@ def stage(build, output, version):
         'SDL2-COPYING.txt': ROOT / 'nesrecomp/runner/external/SDL2/COPYING.txt',
         'ImGui-LICENSE.txt': ROOT / 'recomp-ui/src/third_party/imgui/LICENSE.txt',
         'recomp-ui-LICENSE.txt': ROOT / 'recomp-ui/LICENSE',
+        'recomp-net-LICENSE.txt': ROOT / 'nesrecomp/lib/recomp-net/LICENSE',
+        'rbengine-LICENSE.txt': ROOT / 'nesrecomp/lib/retcomm-rbengine/LICENSE',
         'Fonts-NOTICE.md': ROOT / 'recomp-ui/assets/common/fonts/NOTICE.md',
         'Images-NOTICE.md': ROOT / 'recomp-ui/assets/common/img/NOTICE.md',
         'OFL-1.1.txt': ROOT / 'assets/licenses/OFL-1.1.txt',
@@ -43,6 +45,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--version', default='0.1.0')
+    parser.add_argument('--version', default='0.1.1')
     args = parser.parse_args()
     stage(args.build, args.output, args.version)

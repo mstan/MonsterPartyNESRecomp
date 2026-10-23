@@ -3,8 +3,8 @@ param(
     [string]$Rom = (Join-Path (Split-Path -Parent $PSScriptRoot) 'monsterparty.nes'),
     [string]$BuildDir = 'build-release',
     [string]$OutputDir = (Join-Path (Split-Path -Parent $PSScriptRoot) 'release'),
-    [string]$ArchiveName = 'MonsterParty-0.1.0-windows-x64.zip',
-    [string]$ReleaseVersion = '0.1.0',
+    [string]$ArchiveName = 'MonsterParty-0.1.1-windows-x64.zip',
+    [string]$ReleaseVersion = '0.1.1',
     [switch]$SkipBuild
 )
 $ErrorActionPreference = 'Stop'

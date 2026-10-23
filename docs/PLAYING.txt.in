@@ -18,8 +18,13 @@ CONTROLS AND PROGRESS
 
 Arrow keys: move. Z: A. X: B. Enter: Start. Backslash: Select.
 Escape: menu. Change keyboard and controller bindings in the launcher.
-F8/F9: quick save/load. Quick saves are specific to a build; keep the game's
-passwords for progress you want to carry into an update.
+F7: save-state browser. Choose a slot; S saves, Enter loads, Escape closes.
+F8: rewind. Left/Right selects a moment; Enter resumes there, Escape cancels.
+Controller: Back+L3 opens save states, Back+R3 opens rewind. Use the D-pad to
+choose, X to save, A to load/resume, B to close. Rewind starts enabled; change
+its history settings in the launcher.
+Save states are specific to a build; keep the game's passwords for progress
+you want to carry into an update.
 
 UPDATES AND HELP
 

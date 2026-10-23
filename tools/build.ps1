@@ -6,7 +6,7 @@ param(
     [switch]$Trace,
     [switch]$Headless,
     [switch]$Clean,
-    [string]$ReleaseVersion = '0.1.0',
+    [string]$ReleaseVersion = '0.1.1',
     [string]$ScratchDir,
     [string[]]$CMakeArgs = @()
 )

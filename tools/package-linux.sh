@@ -17,7 +17,9 @@ mkdir -p "$appdir/usr/bin" "$work/tmp" "$(dirname "$output")"
 export TMPDIR="$work/tmp"
 export APPIMAGE_EXTRACT_AND_RUN=1
 export PYTHONDONTWRITEBYTECODE=1
-"$python" "$repo/tools/stage_release.py" --build "$build" --output "$appdir/usr/bin" --version 0.1.0
+version="$(sed -nE 's/^NESRECOMP_GAME_VERSION:[^=]+=//p' "$build/CMakeCache.txt")"
+[ -n "$version" ] || { echo 'Build has no release version' >&2; exit 2; }
+"$python" "$repo/tools/stage_release.py" --build "$build" --output "$appdir/usr/bin" --version "$version"
 cp "$build/MonsterPartyRecomp" "$appdir/usr/bin/"
 strip "$appdir/usr/bin/MonsterPartyRecomp"
 cat > "$work/monster-party.desktop" <<'EOF'

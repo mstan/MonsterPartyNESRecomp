@@ -10,7 +10,8 @@ static bool option(void *ctx,const char *name,const char *value) {(void)ctx;retu
 
 const CycHostExtras *cyc_host_extras(void) {
     static const CycHostOption options[]={
-        {"--mp-assist",true,"life,foes: developer coverage assistance (refill life / clamp object HP)"},
+        {"--mp-assist",true,"life,guardians: developer coverage assistance (refill life / guardians fall to the next hit)"},
+        {"--mp-ram-log",true,"FILE: CPU RAM after every frame (2 KiB records), developer exploration"},
         {"--mp-poke",true,"ADDR=VAL[@+FRAMES]: developer RAM fixture write before a frame (repeatable)"},
     };
     static const CycHostExtras extras={.power_on=power_on,.frame_begin=frame_begin,.frame_end=frame_end,

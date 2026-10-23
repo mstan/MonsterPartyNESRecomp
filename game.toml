@@ -7,3 +7,12 @@
 [game]
 name = "Monster Party"
 output_prefix = "monster-party"
+
+# Developer coverage assist (mp_assist.c, --mp-assist guardians): the routine
+# that applies a landed hit to a guardian (bank 5). Content-keyed, so the
+# repository holds no ROM bytes: tools/hook_keys.py monsterparty.nes --check.
+[[mod_function_hook]]
+id = "monster-party.assist.guardian-hit"
+addr = 0x8D22
+length = 8
+crc32 = 0xFC94C1CD

@@ -1,0 +1,70 @@
+format_version = 1
+id = "monster-party.enhancement.widescreen"
+version = "1.0.0"
+name = "Monster Party Adaptive Widescreen (Experimental)"
+author = "NESRecomp"
+description = "Wider views of scrolling areas drawn from the game's own level data, with optional wider enemy activation."
+license = "PolyForm-Noncommercial-1.0.0"
+resolver = "declarative"
+save_compatibility = "custom"
+
+[[target]]
+game_id = "monster-party-usa"
+rom_crc32 = "02b9e7c2"
+
+[[feature]]
+id = "widescreen"
+name = "Adaptive Widescreen (Experimental)"
+description = "Show more of each scrolling area. Single-screen rooms, the round card and menus stay at the original width. Viewport activation can change enemy timing and difficulty."
+group = "Display"
+exclusive_group = "display-mode"
+default_enabled = false
+
+[[plugin]]
+feature = "widescreen"
+id = "monster-party.widescreen"
+
+[[option]]
+feature = "widescreen"
+id = "aspect"
+label = "Aspect"
+type = "choice"
+default = "fit"
+[[option.choice]]
+value = "fit"
+label = "Fit window (adaptive)"
+[[option.choice]]
+value = "16-9"
+label = "16:9"
+[[option.choice]]
+value = "21-9"
+label = "21:9"
+[[option.choice]]
+value = "32-9"
+label = "32:9"
+
+[[option]]
+feature = "widescreen"
+id = "enemy_activation"
+label = "Enemy activation"
+type = "choice"
+default = "classic"
+[[option.choice]]
+value = "classic"
+label = "Original spawning and culling"
+[[option.choice]]
+value = "viewport"
+label = "Spawn and keep enemies throughout the wide view"
+
+[[option]]
+feature = "widescreen"
+id = "camera"
+label = "Camera"
+type = "choice"
+default = "centered"
+[[option.choice]]
+value = "centered"
+label = "Keep the original screen centered"
+[[option.choice]]
+value = "anchored"
+label = "Stop at area edges (no empty space)"

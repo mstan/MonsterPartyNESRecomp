@@ -16,3 +16,44 @@ id = "monster-party.assist.guardian-hit"
 addr = 0x8D22
 length = 8
 crc32 = 0xFC94C1CD
+
+# Adaptive widescreen (mp_widescreen.c, package monster-party.enhancement.widescreen).
+# Rendering sites: the per-object OAM drawer, the frame's OAM build and the
+# NMI's OAM DMA (fixed bank 7). Viewport activation sites: the column spawner
+# (bank 7) and the two horizontal despawn tests (bank 5; 13-byte keys include
+# each test's distance).
+[[mod_function_hook]]
+id = "monster-party.widescreen.draw"
+addr = 0xC699
+length = 8
+crc32 = 0x2653D59F
+
+[[mod_function_hook]]
+id = "monster-party.widescreen.oam-build"
+addr = 0xC728
+length = 8
+crc32 = 0x7931855E
+
+[[mod_function_hook]]
+id = "monster-party.widescreen.dma"
+addr = 0xC20D
+length = 8
+crc32 = 0x501B2F37
+
+[[mod_function_hook]]
+id = "monster-party.widescreen.spawn"
+addr = 0xDB4B
+length = 8
+crc32 = 0x0B5B4203
+
+[[mod_function_hook]]
+id = "monster-party.widescreen.cull16"
+addr = 0x82EF
+length = 13
+crc32 = 0x1DAC3AC1
+
+[[mod_function_hook]]
+id = "monster-party.widescreen.cull64"
+addr = 0x8306
+length = 13
+crc32 = 0x76C76B35

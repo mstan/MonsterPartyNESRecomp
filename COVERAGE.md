@@ -85,9 +85,17 @@ checked that every owned window stayed hidden and that OpenGL came from private
 Mesa DLLs. Configuration and caches stayed on G:. Defaults are windowed mode,
 audio enabled and volume 100. The software-renderer DLLs are test tools only.
 
-The non-trace release binary passes all 88 round-matrix checks. Final 32:9
-campaign replay is running; its completion is required before the validation
-branch is merged into master.
+The non-trace release binary passes all 88 round-matrix checks. All 385 selected
+segments also pass at 32:9: machine state and native hashes/pictures match stock,
+and native/interpreter presentation pictures and complete states match exactly.
+The final driver also passes a fresh round-7 room/optional-guardian/exit chain
+at 32:9 with parity enabled.
+
+The audited archive is `release/MonsterParty-windows-x64.zip` (36 entries):
+SHA256 `742B15B48BC604263A076A67FE1B2C2CC8F4845A50D13F5FBA19315C2FC13DFF`.
+Its executable matches the tested non-trace binary. The archive includes the
+recomp-ui, font/image and dependency notices, and contains no ROM, player data,
+test software renderer, or either forbidden loading-mod package.
 
 ## Evidence
 
@@ -100,6 +108,8 @@ The main evidence root is `G:/Temp/Codex/MonsterPartyNESRecomp/`:
   final boss, story and credits.
 - `coverage/replay1`, `coverage/replay-title1`, `coverage/replay-extra1`: post-seed
   native/interpreter and recorded-build comparisons.
+- `coverage/replay-wide-core2`, `coverage/replay-wide-extra2`,
+  `coverage/replay-wide-maze2`: complete selected 32:9 parity corpus.
 - `wide/matrix1`, `wide/catalog1`, `wide/viewport-all`, `wide/viewport-save1`,
   `wide/scenes3`: widescreen acceptance evidence.
 - `ui-evidence1`: launcher pictures, settings, loaded-module and hidden-window checks.

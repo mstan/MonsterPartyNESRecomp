@@ -4,6 +4,8 @@ The `monster-party.enhancement.widescreen` package is disabled by default.
 Enable it in Display, then choose Fit, 16:9, 21:9 or 32:9. Fit responds to the
 drawable aspect; a narrow window retains the native 256-pixel picture. The fixed
 presets produce 426, 560 and 854 pixels at the game's 240-line presentation height.
+Aspect is the only widescreen setting. Enemy activation and camera behavior
+are built in.
 
 Scrolling terrain in the margins is decoded from the current area's ROM map,
 metatiles, attributes and CHR banks. Native pixels pass through. The original
@@ -13,18 +15,17 @@ The bottom HUD stays centered and its background extends across the picture.
 Single-screen rooms use backdrop margins. Title/round cards and game-over scenes
 retain the native picture. The game's split-line artifact at line 192 remains.
 
-Viewport activation is the widescreen default: it activates authored enemies
+Widescreen activates authored enemies
 across the wider view and keeps them alive there. The game has only three
 ordinary enemy slots, so this can change timing, difficulty and which enemies fit
 in those slots. The spawn ledger suppresses a second activation when an enemy's
-column later reaches the native edge. Original spawning/culling remains available
-as the Classic option. Boss-room spawning and culling remain original.
+column later reaches the native edge. Boss-room spawning and culling remain
+original.
 
-The default Anchored camera shifts the scrolling playfield near area edges to
+The stage camera shifts the scrolling playfield near area edges to
 avoid showing space outside the level. The HUD remains independently centered.
 Boss arenas and single-screen rooms retain the native centered composition;
 the guardian-area flag explicitly excludes arenas from stage-edge anchoring.
-The optional Centered camera preserves the original screen's centered placement.
 Viewport activation computes that camera directly from the simulation, so its
 behavior does not depend on presentation frequency. A regression compares every
 frame, every 60 frames, and final-only composition, plus interpreter parity.
@@ -35,8 +36,9 @@ An anchored fixture at X=740 also checks sprites across the full one-sided margi
 The headless 900-frame matrix covers all eight round starts, with right/left
 movement, jumps and bat swings. The retained pre-mod executable and the WIP build
 match byte for byte in native frame hashes, PNGs and complete states when the mod
-is disabled or explicitly off. Enabled classic rendering preserves machine state
-and hashes; the added presentation record is the only additional state chunk.
+is disabled or explicitly off. The retired Classic mode supplied the initial
+stock-simulation identity evidence; the current wide view includes wider enemy
+activation and is qualified against the interpreter.
 
 All eight rounds passed 16:9, 21:9 and 32:9 terrain-opacity checks, with no isolated
 call failures or packet overflow. At 32:9, native and interpreter hashes, native
@@ -60,8 +62,8 @@ Run `tests/widescreen/validate.py` for the round matrix and
 `tests/widescreen/scenes.py` for checkpoint and margin-sprite checks. Commands,
 routes, native/presentation pictures, full states and JSON diagnostics are retained
 under the specified non-C: evidence directory. `tests/coverage/replay.py
---widescreen 32:9` adds stock-preserving Classic/Centered presentation parity
-to recorded campaign routes.
+--widescreen 32:9` checks native/interpreter simulation and presentation parity
+on recorded campaign inputs.
 
 `tests/widescreen/defaults.py` checks the owner playtest regressions using the
 actual widescreen defaults: wider enemy activation, no duplicate spawn columns,

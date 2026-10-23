@@ -1,7 +1,7 @@
 """Hidden launcher smoke checks using private software OpenGL DLLs.
 
 --runtime must be an isolated extracted release. Nothing is installed globally;
-the software GL DLLs and all settings/caches stay in the supplied non-C: paths.
+the software GL DLLs and all settings/caches stay in the supplied paths.
 """
 import argparse
 import ctypes
@@ -17,8 +17,6 @@ import time
 def main(args):
     root=args.output.resolve()
     runtime=args.runtime.resolve()
-    if root.drive.upper()=='C:' or runtime.drive.upper()=='C:':
-        raise ValueError('Runtime and evidence must be on non-C: storage')
     root.mkdir(parents=True,exist_ok=True)
     for name in ('opengl32.dll','libgallium_wgl.dll'):
         shutil.copyfile(args.software_gl/name,runtime/name)
@@ -33,7 +31,8 @@ def main(args):
     psapi.GetModuleFileNameExW.argtypes=[wt.HANDLE,wt.HMODULE,wt.LPWSTR,wt.DWORD]
     records=[]
     for name,rom,script in [('first-run',None,f'wait:5;shot:{root}/first-run.png;quit'),
-                            ('configured',args.rom,f'wait:5;shot:{root}/dashboard.png;view:settings;wait:5;shot:{root}/settings.png;view:controller;wait:5;shot:{root}/controller.png;quit')]:
+                            ('configured',args.rom,f'wait:5;shot:{root}/dashboard.png;view:settings;wait:5;shot:{root}/settings.png;view:controller;wait:5;shot:{root}/controller.png;quit'),
+                            ('mods',args.rom,f'size:1100x880;wait:8;click:1020,48;wait:12;shot:{root}/mods.png;quit')]:
         scratch=root/name
         scratch.mkdir(exist_ok=True)
         env=dict(os.environ,TEMP=str(scratch),TMP=str(scratch),APPDATA=str(scratch/'roaming'),LOCALAPPDATA=str(scratch/'local'),

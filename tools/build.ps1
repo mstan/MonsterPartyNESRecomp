@@ -13,12 +13,10 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $build = if ([IO.Path]::IsPathRooted($BuildDir)) { $BuildDir } else { Join-Path $root $BuildDir }
 $build = [IO.Path]::GetFullPath($build)
-if ($build -match '^C:') { throw 'Build output must be on non-C: storage.' }
 if (-not $ScratchDir) {
     $ScratchDir = if ($env:TEMP -match '^[FG]:\\') { $env:TEMP } else { Join-Path $build 'tmp' }
 }
 $ScratchDir = [IO.Path]::GetFullPath($ScratchDir)
-if ($ScratchDir -match '^C:') { throw 'Build scratch must be on non-C: storage.' }
 New-Item -ItemType Directory -Path $ScratchDir -Force | Out-Null
 $env:TEMP = $env:TMP = $ScratchDir
 $vs = 'C:\Program Files\Microsoft Visual Studio\2022\Community'

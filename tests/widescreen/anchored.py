@@ -17,7 +17,7 @@ def main(args):
     for n in (1,8):
         state=ROOT/'evidence'/'rounds'/f'round{n}-start.cycstate'
         first=mp_run.start_frame(state)
-        extra=['--widescreen','32:9','--widescreen-camera','anchored','--widescreen-enemies','viewport']
+        extra=['--widescreen','32:9']
         runs=[]
         for cadence in (0,1,60):
             name=f'round{n}-every{cadence}'

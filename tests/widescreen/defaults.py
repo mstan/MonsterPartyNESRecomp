@@ -25,14 +25,14 @@ def main(args):
         if not all(checks.values()):
             raise AssertionError(name)
 
-    def run(name, state, frames, extra=(), interp=False, text=None, wide=True):
+    def run(name, state, frames, extra=(), interp=False, text=None, wide=True, exe=None):
         stem = args.output / name
         options = ['--present-out', str(stem.with_suffix('.present.png'))]
         if wide:
             options += ['--widescreen', '32:9', '--widescreen-report', str(stem.with_suffix('.jsonl'))]
         r = mp_run.run(args.output, name, frames, state=state,
                        route=route(mp_run.start_frame(state), frames) if text is None else text,
-                       assist='life', extra=options + list(extra), exe=args.exe, interp=interp)
+                       assist='life', extra=options + list(extra), exe=exe or args.exe, interp=interp)
         r['stem'] = stem
         r['rows'] = [json.loads(s) for s in stem.with_suffix('.jsonl').read_text().splitlines()] if wide else []
         return r
@@ -77,6 +77,9 @@ def main(args):
                 x = int.from_bytes(bytes((ram[at + 0x3dc + k], ram[at + 0x413 + k])), 'little', signed=True)
                 margin_enemy |= x < 0 or x >= 256
         checks = {f'parity{ext}': same(r, i, ext) for ext in ('.hash', '.png', '.present.png', '.cycstate')}
+        if args.before_exe:
+            before=run(f'round{n}-before',state,args.frames,exe=args.before_exe)
+            checks.update({f'accepted{ext}':same(r,before,ext) for ext in ('.hash','.png','.present.png','.cycstate')})
         checks.update(defaults=all(row['viewport'] and row['anchored'] for row in r['rows']),
                       centered_hud=native_crop(r, hud_only=True),
                       no_duplicate_columns=not duplicate,
@@ -122,6 +125,7 @@ def main(args):
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--exe', type=Path, required=True)
+    ap.add_argument('--before-exe', type=Path, help='prove identity to the accepted build before removing its controls')
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--rounds', type=int, nargs='*', default=list(range(1, 9)))
     ap.add_argument('--frames', type=int, default=900)

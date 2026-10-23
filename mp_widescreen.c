@@ -20,7 +20,7 @@
  *   (i = 0..10); 7:$C699 draws object Y into the OAM buffer from offset $18
  *   through 7:$C565, which hides a piece whose 16-bit X is off page 0. 7:$C728
  *   builds the buffer once per frame; the NMI DMAs it at 7:$C20D.
- * Spawning (viewport option): 7:$DB4B spawns the enemy authored for the
+ * Spawning: 7:$DB4B spawns the enemy authored for the
  *   16-pixel column just scrolled in (table ($71), index (page+$51)*16 +
  *   X/16) into objects 6-8; 5:$82EF and 5:$8306 despawn an object further
  *   than 16 / 64 pixels outside the screen.
@@ -69,7 +69,7 @@ typedef struct {
 static WsState ws;
 
 /* ---- settings ---- */
-static int enabled, viewport = 1, anchored = 1, aspect = NES_VIDEO_FIT;
+static int enabled, aspect = NES_VIDEO_FIT;
 static FILE *report;
 static uint64_t report_frame;
 
@@ -239,7 +239,7 @@ static int margin_left(void)
     if (w <= 256) return 0;
     /* Simulation must not depend on whether the host composed a picture this
      * frame (headless captures, skipped presentation, or a slow display). */
-    return anchored && scene() == SCENE_SCROLL ? anchored_origin(w, game_camera(), world_width()) : (w - 256) / 2;
+    return scene() == SCENE_SCROLL ? anchored_origin(w, game_camera(), world_width()) : (w - 256) / 2;
 }
 static int margin_right(void) { int w = cyc_video_width(); return w > 256 ? w - 256 - margin_left() : 0; }
 
@@ -285,7 +285,7 @@ static bool spawn_column(int wx, int dir, int cam)
 
 static void viewport_spawn(void)
 {
-    if (!viewport || scene() != SCENE_SCROLL || cyc_video_width() <= 256) return;
+    if (scene() != SCENE_SCROLL || cyc_video_width() <= 256) return;
     if (R(0x52) & 0x80) return;     /* 7:$D4BB: guardian/boss areas keep their own spawning */
     int cam = game_camera(), offset = R(0x51), wl = margin_left(), wr = margin_right(), width = world_width();
     int table = ptr(0x71);
@@ -312,7 +312,7 @@ static void viewport_spawn(void)
 
 static void viewport_forget(void)
 {
-    if (!viewport || scene() != SCENE_SCROLL) { memset(ws.ledger, 0, sizeof ws.ledger); return; }
+    if (scene() != SCENE_SCROLL) { memset(ws.ledger, 0, sizeof ws.ledger); return; }
     int cam = game_camera(), offset = R(0x51), wl = margin_left(), wr = margin_right();
     bool keep[256] = {0};
     for (int wx = (cam - wl - 16) & ~15; wx < cam + 256 + wr + 16; wx += 16)
@@ -325,7 +325,7 @@ static void viewport_forget(void)
  * wide view keeps that activation (no second enemy at the 4:3 edge). */
 static int hook_spawn(void)
 {
-    if (!viewport || scene() != SCENE_SCROLL || cyc_video_width() <= 256) return 0;
+    if (scene() != SCENE_SCROLL || cyc_video_width() <= 256) return 0;
     if (R(0x33A) & 0x80) {
         int dir = R(0x521) & 1, page = (dir + R(0x50)) & 0xFF;
         if (!(page & 0x80)) {
@@ -346,7 +346,7 @@ static int hook_spawn(void)
  * the native byte test cannot tell apart at 32:9. */
 static int hook_cull(int reach)
 {
-    if (!viewport || scene() != SCENE_SCROLL || cyc_video_width() <= 256) return 0;
+    if (scene() != SCENE_SCROLL || cyc_video_width() <= 256) return 0;
     int obj = R(0x3A);
     if (obj > 10) return 0;
     int x16 = (int16_t)(uint16_t)(R(0x40D + obj) << 8 | R(0x3D6 + obj));
@@ -450,7 +450,7 @@ static int render(uint32_t *out, int width, int height, int x0, const uint32_t *
     if (!level_now(&l)) return 0;
     int cam = unwrap(cyc_render_line_scroll_x(80), game_camera(), 512);
     int px0 = x0;
-    if (last_scene == SCENE_SCROLL && anchored) px0 = anchored_origin(width, cam, l.width);
+    if (last_scene == SCENE_SCROLL) px0 = anchored_origin(width, cam, l.width);
     last_origin = px0;
     cyc_render_set_native_origin(px0);
     memset(coverage, 0, (size_t)width * 240);
@@ -532,31 +532,22 @@ static void enable(int on)
         if (!registered) fprintf(stderr, "[widescreen] cannot register the presentation state\n");
     }
     enabled = on;
-    for (int i = 0; i < H_COUNT; i++) {
-        bool policy = i == H_SPAWN || i == H_CULL16 || i == H_CULL64;
-        nes_mod_set_function_hook_enabled(hook_ids[i], on && (!policy || viewport));
-    }
+    for (int i = 0; i < H_COUNT; i++) nes_mod_set_function_hook_enabled(hook_ids[i], on);
     cyc_video_set_mode(on ? aspect : NES_VIDEO_STOCK);
     cyc_render_set_compositor(on ? render : NULL, NULL);
     memset(&ws, 0, sizeof ws);
 }
-static void reset_mod(void) { viewport = 1; anchored = 1; enable(0); }
+static void reset_mod(void) { enable(0); }
 static void activate(void)
 {
-    char a[32] = "fit", e[32] = "viewport", c[32] = "anchored";
+    char a[32] = "fit";
     nes_mod_option_value(WS_PACKAGE, "widescreen", "aspect", a, sizeof a);
-    nes_mod_option_value(WS_PACKAGE, "widescreen", "enemy_activation", e, sizeof e);
-    nes_mod_option_value(WS_PACKAGE, "widescreen", "camera", c, sizeof c);
     if (!nes_video_geometry_parse(a, &aspect) || aspect == NES_VIDEO_STOCK) aspect = NES_VIDEO_FIT;
-    viewport = !strcmp(e, "viewport");
-    anchored = !strcmp(c, "anchored");
     enable(1);
 }
 
 const CycHostOption mp_ws_options[] = {
     {"--widescreen", true, "fit|16:9|21:9|32:9|off: adaptive widescreen (experimental)"},
-    {"--widescreen-enemies", true, "classic|viewport: original spawning, or activation across the wide view"},
-    {"--widescreen-camera", true, "centered|anchored: keep the screen centered, or stop at area edges"},
     {"--widescreen-report", true, "FILE: periodic widescreen diagnostics (JSON lines)"},
 };
 const size_t mp_ws_option_count = sizeof mp_ws_options / sizeof mp_ws_options[0];
@@ -569,17 +560,6 @@ bool mp_ws_option(const char *name, const char *value)
         if (!nes_video_geometry_parse(value, &m) || m == NES_VIDEO_STOCK) return false;
         aspect = m;
         enable(1);
-        return true;
-    }
-    if (!strcmp(name, "--widescreen-enemies")) {
-        if (strcmp(value, "viewport") && strcmp(value, "classic")) return false;
-        viewport = !strcmp(value, "viewport");
-        if (enabled) enable(1);
-        return true;
-    }
-    if (!strcmp(name, "--widescreen-camera")) {
-        if (strcmp(value, "centered") && strcmp(value, "anchored")) return false;
-        anchored = !strcmp(value, "anchored");
         return true;
     }
     if (!strcmp(name, "--widescreen-report")) {
@@ -604,7 +584,7 @@ static void debug_fields(char *out, size_t cap)
              "\"area\":%d,\"page_offset\":%d,\"last_page\":%d,\"pieces\":%d,\"captures\":%llu,\"spawns\":%llu,"
              "\"retains\":%llu,\"culls\":%llu,\"suppressed\":%llu,\"overflow\":%llu,\"failures\":%llu,"
              "\"mod_failures\":%llu,\"terrain_samples\":%d,\"terrain_errors\":%d",
-             enabled ? "true" : "false", viewport ? "true" : "false", anchored ? "true" : "false", cyc_video_width(),
+             enabled ? "true" : "false", enabled ? "true" : "false", enabled ? "true" : "false", cyc_video_width(),
              scene(), scene() ? unwrap(cyc_render_line_scroll_x(80), game_camera(), 512) : -1, last_origin, R(0x4F), R(0x51), R(0x32E), ws.display_count,
              (unsigned long long)captures, (unsigned long long)spawns, (unsigned long long)retains,
              (unsigned long long)culls, (unsigned long long)suppressed, (unsigned long long)overflow,

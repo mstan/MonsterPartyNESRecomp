@@ -9,6 +9,7 @@ import shutil
 from pathlib import Path
 import struct
 import sys
+import tomllib
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -54,6 +55,10 @@ def validate(args):
     def same(a, b, ext):
         return a['stem'].with_suffix(ext).read_bytes() == b['stem'].with_suffix(ext).read_bytes()
 
+    if args.catalog_only:
+        manifest=ROOT/'mods/preloaded/packages/monster-party.enhancement.widescreen/1.0.0/manifest.toml'
+        record('catalog/aspect-only',options=[o['id'] for o in tomllib.loads(manifest.read_text())['option']]==['aspect'])
+
     for n in args.rounds:
         out = args.output / f'round{n}'
         state = ROOT / 'evidence' / 'rounds' / f'round{n}-start.cycstate'
@@ -73,7 +78,7 @@ def validate(args):
                    width=all(row['enabled'] and row['width']==854 for row in enabled['rows']))
             continue
         if args.viewport_only:
-            extra=['--widescreen','32:9','--widescreen-enemies','viewport']
+            extra=['--widescreen','32:9']
             r=run(out,'viewport',state,extra=extra)
             i=run(out,'viewport-interp',state,extra=extra,interp=True)
             record(f'round{n}/viewport', **{ext:same(r,i,ext) for ext in ('.hash','.png','.present.png','.cycstate')},
@@ -111,15 +116,14 @@ def validate(args):
         record(f'round{n}/catalog-default', hash=same(base,r,'.hash'), state=same(base,r,'.cycstate'))
         for aspect, width in [('16:9',426),('21:9',560),('32:9',854)]:
             name = aspect.replace(':','-')
-            classic = ['--widescreen',aspect,'--widescreen-enemies','classic','--widescreen-camera','centered']
-            r = run(out, name, state, extra=classic)
+            profile = ['--widescreen',aspect]
+            r = run(out, name, state, extra=profile)
             size = struct.unpack('>II', r['stem'].with_suffix('.present.png').read_bytes()[16:24])
-            record(f'round{n}/{name}', hash=same(base,r,'.hash'), machine=machine(base['state']) == machine(r['state']),
-                   size=size == (width,240), sampled=any(row['terrain_samples'] > 0 for row in r['rows']),
+            record(f'round{n}/{name}', size=size == (width,240), sampled=any(row['terrain_samples'] > 0 for row in r['rows']),
                    terrain=all(row['terrain_errors']==0 for row in r['rows']),
                    isolated=all(row['failures']==0 and row['mod_failures']==0 and row['overflow']==0 for row in r['rows']))
             if aspect == '32:9':
-                i = run(out, name+'-interp', state, extra=classic, interp=True)
+                i = run(out, name+'-interp', state, extra=profile, interp=True)
                 record(f'round{n}/32-9-parity', **{ext:same(r,i,ext) for ext in ('.hash','.png','.present.png','.cycstate')})
         for drawable, width in [('1280x720',426),('3840x1080',854),('1024x960',256)]:
             r = run(out, 'fit-'+drawable, state, frames=120, extra=['--widescreen','fit','--present-size',drawable])

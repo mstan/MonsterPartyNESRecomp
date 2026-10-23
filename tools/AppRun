@@ -1,0 +1,26 @@
+#!/bin/sh
+set -eu
+bundle="$(dirname "$(readlink -f "$0")")"
+data="${XDG_DATA_HOME:-$HOME/.local/share}/MonsterParty"
+mkdir -p "$data"
+payload="$(cat "$bundle/payload-id")"
+installed=""
+[ ! -f "$data/.payload-id" ] || installed="$(cat "$data/.payload-id")"
+if [ "$installed" != "$payload" ]; then
+    # Refresh only files owned by the release. User settings, saves and
+    # additional mods are never copied over or deleted.
+    while IFS='|' read -r source target; do
+        mkdir -p "$(dirname "$data/$target")"
+        cp -L "$bundle/$source" "$data/$target.new.$$"
+        mv -f "$data/$target.new.$$" "$data/$target"
+    done < "$bundle/payload-files"
+    chmod +x "$data/MonsterPartyRecomp"
+    printf '%s\n' "$payload" > "$data/.payload-id.new.$$"
+    mv -f "$data/.payload-id.new.$$" "$data/.payload-id"
+fi
+# The binary uses its own RUNPATH. Do not set LD_LIBRARY_PATH: the system's
+# ROM picker must use its host libraries, not libraries shipped in this bundle.
+export SDL_JOYSTICK_HIDAPI_STEAM=1
+export SDL_GAMECONTROLLER_ALLOW_STEAM_VIRTUAL_GAMEPAD=1
+cd "$data"
+exec "$data/MonsterPartyRecomp" "$@"

@@ -27,3 +27,5 @@ evidence/
 coverage-evidence/
 wide-evidence/
 __pycache__/
+
+*.AppImage

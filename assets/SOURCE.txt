@@ -3,6 +3,7 @@ Source: https://strategywiki.org/wiki/Monster_Party
 Image: https://cdn.wikimg.net/en/strategywiki/images/e/e1/Monster_Party_cover.jpg
 Retrieved 2026-10-23. Converted without content changes to RGB TGA for recomp-ui.
 Used as the game's identifying launcher artwork; no ROM is included.
+assets/icon.png is the same scan resized and padded for Linux desktop integration.
 
 Font license text: assets/licenses/OFL-1.1.txt comes unchanged from the LatoLatin
 package pinned by recomp-ui/assets/common/fonts/NOTICE.md:

@@ -6,6 +6,7 @@ param(
     [switch]$Trace,
     [switch]$Headless,
     [switch]$Clean,
+    [string]$ReleaseVersion = '0.1.0',
     [string]$ScratchDir,
     [string[]]$CMakeArgs = @()
 )
@@ -39,7 +40,8 @@ if ($Clean -and (Test-Path -LiteralPath $build)) {
 $traceValue = if ($Trace) { 'ON' } else { 'OFF' }
 $configure = @('-S', $root, '-B', $build, '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release',
     '-DCMAKE_C_COMPILER=cl', '-DCMAKE_CXX_COMPILER=cl', "-DNESRECOMP_ROM=$((Resolve-Path -LiteralPath $Rom).Path)",
-    "-DPython3_EXECUTABLE=$python", "-DNESRECOMP_ENABLE_TRACE:BOOL=$traceValue")
+    "-DPython3_EXECUTABLE=$python", "-DNESRECOMP_ENABLE_TRACE:BOOL=$traceValue",
+    "-DNESRECOMP_GAME_VERSION:STRING=$ReleaseVersion")
 if ($Headless) { $configure += '-DNESRECOMP_HEADLESS=ON' }
 $ErrorActionPreference = 'Continue'
 & $cmake @($configure + $CMakeArgs) 2>&1 | ForEach-Object { "$_" }

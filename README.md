@@ -1,70 +1,88 @@
-# Monster Party
+# Monster Party Recompiled
 
-Monster Party (USA) for Windows x64, running on NESRecomp's cycle backend with
-the recomp-ui launcher. Supply your own original USA ROM; no ROM is distributed.
-The supported image has MMC1, eight 16 KiB PRG banks, and payload CRC32 `02B9E7C2`.
+Play **Monster Party** on Windows and Linux with adaptive widescreen, controller
+support, and a modern launcher. Join Mark and Bert for the original eight-round
+adventure.
 
-Select the matching ROM in the launcher. Arrow keys control movement, Z is A,
-X is B, Enter is START, and backslash is SELECT. Escape opens the menu; controls
-can be remapped. F8/F9 save and load execution snapshots. Snapshots are disposable
-and specific to a build. Keep the game's passwords for persistent progress.
+## Download and play
 
-Adaptive widescreen is an optional mod in the Display group. Aspect is its only
-setting. Fit follows the
-window's aspect; 16:9, 21:9, and 32:9 are also available. Enemies activate across
-the wider view, and the stage camera stops at level edges. The HUD and boss
-rooms stay centered. See [WIDESCREEN.md](WIDESCREEN.md) for behavior and validation.
-The content audit, determinism results and release checks are in
-[COVERAGE.md](COVERAGE.md).
+1. Download the Windows ZIP or Linux AppImage from the
+   [latest release](https://github.com/mstan/MonsterPartyNESRecomp/releases/latest).
+2. **Windows:** extract the complete ZIP and open `MonsterPartyRecomp.exe`.
+   **Linux:** make the AppImage executable and open it.
+3. Select your original **Monster Party (USA)** ROM in the launcher.
+4. Set up your keyboard or controller, then choose **PLAY**.
 
-## Build
+No game ROM is included. The launcher checks that your ROM is supported.
+Downloads are for 64-bit Windows and Linux. The Linux build targets Ubuntu 22.04
+or newer and comparable distributions, with an OpenGL 3.3 capable graphics driver.
 
-Use Visual Studio 2022 Community with the C++ workload, its bundled CMake/Ninja,
-and Windows Python 3.12. The submodules are pinned to NESRecomp `a76140c` and
-recomp-ui `7c635c6`. This repository is local only; do not add a remote or push
-without the owner's instruction.
+## A wider view
 
-```powershell
-$env:TEMP = 'G:\Temp\Codex\MonsterPartyNESRecomp\tmp'
-$env:TMP = $env:TEMP
-New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
-.\tools\build.ps1 -Trace -BuildDir G:\Temp\Codex\MonsterPartyNESRecomp\build-validation
+Enable **Adaptive Widescreen** under **Mods > Display**. Its only setting is
+**Aspect**: choose **Fit** to follow your window, or select 16:9, 21:9, or 32:9.
+Enemies appear across the wider view, and the stage camera stops at level edges.
+The life bar stays centered below the action, and boss rooms keep their centered
+presentation.
+
+![Round 1 in widescreen](docs/images/round1-widescreen.png)
+
+![Round 3 in widescreen](docs/images/round3-widescreen.png)
+
+![Round 8 in widescreen](docs/images/round8-widescreen.png)
+
+*Actual gameplay captures from this release.*
+
+## Controls and progress
+
+Keyboard and controller bindings can be changed in the launcher.
+
+| Action | Default key |
+| --- | --- |
+| Move | Arrow keys |
+| A / B | Z / X |
+| Start / Select | Enter / Backslash |
+| Menu | Escape |
+| Quick save / load | F8 / F9 |
+
+Keep the game's passwords for progress you want to carry into an update.
+Quick saves are specific to a build and may not carry between releases.
+Windows keeps settings beside the program. Linux keeps them in your user data
+folder (`~/.local/share/MonsterParty` by default).
+
+## Help and feedback
+
+[Report a problem](https://github.com/mstan/MonsterPartyNESRecomp/issues) with
+your version, operating system, aspect setting, and the steps that caused it.
+A screenshot is helpful.
+
+If Linux reports that FUSE is unavailable, run the AppImage with:
+
+```sh
+chmod +x MonsterParty-0.1.0-linux-x86_64.AppImage
+./MonsterParty-0.1.0-linux-x86_64.AppImage --appimage-extract-and-run
 ```
 
-Put `monsterparty.nes` beside this README or pass `-Rom`. Build products, original
-game data, save states, diagnostics and Ghidra databases are ignored. Source and
-tool text use LF line endings. Prefer an unsaturated drive for bulk temporary
-data, and clean up disposable builds and caches after use. C: is also supported.
+For source builds, see the [build guide](docs/BUILDING.md).
+Development coverage and known limitations are in the
+[validation notes](docs/development/VALIDATION.md).
 
-## Headless coverage
+## Credits and license
 
-All agent validation uses hidden processes, SDL dummy video/audio, `--no-save`,
-journaled work-RAM fixtures, and retained commands/routes/screenshots/states.
-Developer assists are disabled unless explicitly requested. `life` refills life;
-`guardians` weakens a guardian only after a real hit lands, leaving the original
-defeat code to run. Fixtures never patch guest code.
+Monster Party and its original artwork belong to their respective owners.
+This is an unofficial fan project built with
+[NESRecomp](https://github.com/mstan/nesrecomp) and
+[recomp-ui](https://github.com/mstan/recomp-ui).
+Project code uses the [PolyForm Noncommercial license](LICENSE.md).
+Third-party notices accompany the downloads. Box artwork is credited in
+[assets/SOURCE.txt](assets/SOURCE.txt).
 
-```powershell
-& 'C:\Users\Matthew\AppData\Local\Programs\Python\Python312\python.exe' -I tests\coverage\campaign.py --tag audit --clear --parity --exe G:\Temp\Codex\MonsterPartyNESRecomp\build-validation\MonsterPartyRecomp.exe --output G:\Temp\Codex\MonsterPartyNESRecomp\audit
-```
+---
 
-`tools/mp_doors.py` decodes all 132 round door entries. `tools/mp_map.py` reads
-the live feature grid. The campaign visits rooms, audits maze destinations
-against the decoded tables, defeats guardians and checks actual next-round
-initialization. Independent maze and optional-encounter branches are recorded.
-`tests/coverage/cases.py` covers title/attract, death/continue, pill pickup, Bert
-flight/expiry and pause. `tests/coverage/ending.py` continues a genuine final-boss
-entry through the ending. `tests/coverage/replay.py` compares a retained run with
-a rebuilt native executable and its interpreter, byte for byte.
+<p align="center">
+  <sub><b>R.A.I.D. — Retro AI Development</b> · a Discord for AI-assisted retro reverse-engineering, decomp &amp; recomp</sub>
+</p>
 
-Only observed instruction starts are added by `tools/harvest_seeds.py`.
-The self-modifying sound trampoline in stack RAM remains interpreted. Instructions
-that straddle a 4 KiB program-view boundary can also remain interpreted despite
-being seeded. These are execution fallbacks, not missing game handlers.
-
-The release packager in `tools/package.ps1` builds with trace disabled, includes
-the UI/assets/dependency notices, and verifies that ROMs, player data, test logs
-and development fixtures are absent. It creates a local ZIP and publishes nothing.
-
-Box artwork is the original Bandai package scan from
-[StrategyWiki](https://strategywiki.org/wiki/Monster_Party); see `assets/SOURCE.txt`.
+<p align="center">
+  <a href="https://discord.gg/Ad9BwSzctP"><img src=".github/raid-discord.png" alt="Join the Retro AI Development (R.A.I.D.) Discord" width="200"></a>
+</p>

@@ -1,6 +1,6 @@
 """Headless widescreen acceptance matrix; every comparison retains its inputs.
 
-Run with Windows Python -I. Evidence is outside C: and includes native pictures,
+Run with Windows Python -I. Evidence includes native pictures,
 presentation pictures, full states, routes, commands, and decoder diagnostics.
 """
 import argparse

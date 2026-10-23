@@ -1,9 +1,9 @@
 format_version = 1
 id = "monster-party.enhancement.widescreen"
 version = "1.0.0"
-name = "Monster Party Adaptive Widescreen (Experimental)"
+name = "Monster Party Adaptive Widescreen"
 author = "NESRecomp"
-description = "Wider views of scrolling areas drawn from the game's own level data, with optional wider enemy activation."
+description = "See more of each stage with adaptive widescreen. Enemies fill the wider view while the life bar and boss rooms stay centered."
 license = "PolyForm-Noncommercial-1.0.0"
 resolver = "declarative"
 save_compatibility = "custom"
@@ -14,7 +14,7 @@ rom_crc32 = "02b9e7c2"
 
 [[feature]]
 id = "widescreen"
-name = "Adaptive Widescreen (Experimental)"
+name = "Adaptive Widescreen"
 description = "Show more of each scrolling area, with enemies active across the wider view and the camera stopped at level edges. The HUD and boss rooms stay centered."
 group = "Display"
 exclusive_group = "display-mode"
@@ -42,4 +42,3 @@ label = "21:9"
 [[option.choice]]
 value = "32-9"
 label = "32:9"
-

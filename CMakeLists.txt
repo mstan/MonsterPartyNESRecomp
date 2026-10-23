@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
-project(MonsterPartyRecomp C CXX)
+project(MonsterPartyRecomp VERSION 0.1.0 LANGUAGES C CXX)
+set(NESRECOMP_GAME_VERSION "${PROJECT_VERSION}" CACHE STRING "Game release version")
 set(NESRECOMP_BACKEND "cycle" CACHE STRING "Execution backend (cycle only)")
 if(NOT NESRECOMP_BACKEND STREQUAL "cycle")
     message(FATAL_ERROR "Monster Party uses the cycle backend")
@@ -29,6 +30,9 @@ endif()
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/tools/verify_usa_rom.py" "${NESRECOMP_ROM}")
 
+if(UNIX AND NOT APPLE AND NOT NESRECOMP_HEADLESS)
+    find_package(SDL2 2.24 REQUIRED CONFIG)
+endif()
 include("${NESRECOMP_ROOT}/runner/cyc/project.cmake")
 nesrecomp_add_cycle_game(MonsterPartyRecomp
     ROM "${NESRECOMP_ROM}"
@@ -36,10 +40,10 @@ nesrecomp_add_cycle_game(MonsterPartyRecomp
     RECOMPILER "${NESRECOMP_HOST_COMPILER}"
     SEED_FILE "${NESRECOMP_CYCLE_SEEDS}"
     MODS GAME_ID "monster-party-usa"
-    HOST_EXTRAS mp_host.c mp_assist.c mp_widescreen.c
+    HOST_EXTRAS src/mp_host.c src/mp_assist.c src/mp_widescreen.c
     BOXART "${CMAKE_CURRENT_SOURCE_DIR}/assets/boxart.tga"
     PLAYERS 1 REGION NTSC)
-target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_custom_command(TARGET MonsterPartyRecomp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded" "$<TARGET_FILE_DIR:MonsterPartyRecomp>/mods")

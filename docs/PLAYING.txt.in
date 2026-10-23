@@ -1,0 +1,30 @@
+Monster Party Recompiled @VERSION@
+
+GET STARTED
+
+Windows: extract the complete ZIP, then open MonsterPartyRecomp.exe.
+Linux: make the AppImage executable, then open it.
+Select your original Monster Party (USA) ROM and choose PLAY.
+No game ROM is included.
+
+WIDESCREEN
+
+Open Mods > Display and enable Adaptive Widescreen. Aspect is the only setting:
+Fit follows your window; 16:9, 21:9 and 32:9 are also available. Enemies appear
+across the wider view, and the stage camera stops at level edges. The HUD and
+boss rooms stay centered.
+
+CONTROLS AND PROGRESS
+
+Arrow keys: move. Z: A. X: B. Enter: Start. Backslash: Select.
+Escape: menu. Change keyboard and controller bindings in the launcher.
+F8/F9: quick save/load. Quick saves are specific to a build; keep the game's
+passwords for progress you want to carry into an update.
+
+UPDATES AND HELP
+
+https://github.com/mstan/MonsterPartyNESRecomp
+When reporting a problem, include your version, operating system, aspect
+setting and the steps that caused it. A screenshot is helpful.
+
+Project and third-party licenses are in licenses/.

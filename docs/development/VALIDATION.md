@@ -77,8 +77,6 @@ See [WIDESCREEN.md](WIDESCREEN.md) for the eight-round geometry, stock identity,
 native/interpreter parity, save/load, Fit, viewport activation, room/death/pause,
 and signed margin-sprite checks. Real catalogs pass with the feature disabled
 by default and enabled through their stored options. Anchored activation matches
-across every-frame, occasional and final-only composition, and an X=740 sprite
-fixture covers its full one-sided margin.
 
 The first-run launcher, verified-ROM dashboard, settings and controller screens
 were visually inspected in a hidden software-rendered session. The validator
@@ -125,6 +123,30 @@ recomp-ui, font/image and dependency notices, and contains no ROM, player data,
 test software renderer, or either forbidden loading-mod package.
 The earlier `MonsterParty-windows-x64.zip` is retained as the original release;
 it still has the earlier Classic/Centered defaults.
+
+## Release 0.1.0
+
+The product release moves game integrations to `src/`, keeps developer notes
+under `docs/development/`, and adds three unaltered gameplay captures to the
+front page. PNG compression preserves every pixel.
+
+The Windows release passes 88 rendering records, 17 real-catalog records and
+three hidden launcher cases. The Linux AppImage is built with GCC 11 on Ubuntu
+22.04 and SDL2 2.30.12. On Ubuntu 24.04, all eight 120-frame round routes match
+Windows per-frame hashes (ignoring CRLF/LF), native pictures and wide pictures.
+Each also passes native/interpreter full-state parity and a current-build
+mid-route save/load replay. No cross-build save-state compatibility is promised.
+
+Linux first-run, verified-ROM and Aspect-only Mods screens were visually checked
+under Xvfb. A stub native picker verifies the launcher's real file-selection
+handoff without opening a desktop dialog; it receives the host library
+environment. A forced runtime refresh preserves settings, ROM selection, mod
+choices and sentinel user files. The package deliberately uses the host C++
+runtime: bundling GCC 11's older library prevented newer Mesa drivers from loading.
+
+Evidence is in `G:/Temp/Codex/MonsterPartyNESRecomp/release-010-evidence/`.
+The release archives contain player instructions, launcher artwork and notices,
+with no ROMs, player files, test renderers or loading-speed mod packages.
 
 ## Evidence
 

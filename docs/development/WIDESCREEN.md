@@ -61,7 +61,7 @@ their margins use backdrop rather than decoded terrain.
 Run `tests/widescreen/validate.py` for the round matrix and
 `tests/widescreen/scenes.py` for checkpoint and margin-sprite checks. Commands,
 routes, native/presentation pictures, full states and JSON diagnostics are retained
-under the specified non-C: evidence directory. `tests/coverage/replay.py
+under the specified evidence directory. `tests/coverage/replay.py
 --widescreen 32:9` checks native/interpreter simulation and presentation parity
 on recorded campaign inputs.
 

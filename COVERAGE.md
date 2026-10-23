@@ -109,10 +109,17 @@ The updated release also passes the full 88-check rendering matrix and all 16
 real-catalog checks, including enabled features with the new option defaults.
 Their evidence is in `wide-evidence/owner-fix/matrix` and `catalog` in the
 repository workspace.
+The follow-up removes the activation and camera controls entirely. Aspect is
+the only setting. All eight 180-frame round routes match the accepted build's
+hashes, native/presentation pictures and full states byte for byte; interpreter
+and save/load checks pass too. The updated matrix has 88 passing checks, the
+catalog has 17 (including the Aspect-only schema), presentation cadence has two,
+and three hidden launcher cases pass. The real Mods screen was visually checked
+to contain only Aspect. This follow-up totals 123 passing regression records.
 
 The updated archive is
-`release/MonsterParty-windows-x64-20261023-playtest.zip` (36 entries):
-SHA256 `472C0BA89336ED98EE972BBCE29E08403493BFDF33C841938C0884396C01B2F6`.
+`release/MonsterParty-windows-x64-20261023-aspect-only.zip` (36 entries):
+SHA256 `01AA2048D6219B2E352CAD7936A8BF4AB86979A3EE93CBFD5547520D89A412C1`.
 Its executable matches the tested non-trace binary. The archive includes the
 recomp-ui, font/image and dependency notices, and contains no ROM, player data,
 test software renderer, or either forbidden loading-mod package.

@@ -21,9 +21,7 @@ def main(args):
     def run(name,state,frames=120,wide=True,interp=False):
         out=args.output/name
         extra=['--present-out',str(out.with_suffix('.present.png'))]
-        if wide:extra+=['--widescreen','32:9','--widescreen-report',str(out.with_suffix('.jsonl')),
-                        '--widescreen-camera','anchored' if args.anchored else 'centered',
-                        '--widescreen-enemies','classic']
+        if wide:extra+=['--widescreen','32:9','--widescreen-report',str(out.with_suffix('.jsonl'))]
         r=mp_run.run(args.output,name,frames,state=state,extra=extra,exe=args.exe,interp=interp)
         r['stem']=out
         r['rows']=[json.loads(s) for s in out.with_suffix('.jsonl').read_text().splitlines()] if wide else []
@@ -52,9 +50,10 @@ def main(args):
         hidden=Image.open(empty['stem'].with_suffix('.present.png')).convert('RGB')
         delta=ImageChops.difference(picture,hidden)
         x0=(picture.width-256)//2
-        if args.anchored:
+        if data[0x32e] and not data[0x52]&128:
             cam=data[0x50]*256+data[0x25]
-            x0=min(x0,cam)
+            lw=(data[0x32e]+1)*256
+            x0=cam+(picture.width-lw)//2 if lw<=picture.width else max(cam+picture.width-lw,min(x0,cam))
         box=delta.getbbox()
         record('margin-sprite',visible=box is not None,margin=box is not None and (box[2]<=x0 if args.sprite_x<0 else box[0]>=x0+256),
                parity=same(r,i,'.present.png') and same(r,i,'.cycstate'),native_unchanged=same(r,empty,'.png'))
@@ -73,5 +72,4 @@ if __name__=='__main__':
     ap.add_argument('--states',type=Path,nargs='*',default=[])
     ap.add_argument('--sprite-state',type=Path)
     ap.add_argument('--sprite-x',type=int,default=-40)
-    ap.add_argument('--anchored',action='store_true')
     main(ap.parse_args())

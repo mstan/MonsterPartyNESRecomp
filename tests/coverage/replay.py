@@ -47,15 +47,12 @@ def replay(args):
             pokes=[cmd[i+1] for i,k in enumerate(cmd) if k=='--mp-poke']
             out=args.output/source.name/path.parent.relative_to(source)
             opts=[]
-            for option in ('--widescreen','--widescreen-enemies','--widescreen-camera','--present-size'):
+            for option in ('--widescreen','--present-size'):
                 if option in cmd:
                     opts += [option,cmd[cmd.index(option)+1]]
             iopts=opts.copy()
             if args.widescreen:
-                # This comparison promises stock simulation identity. The
-                # current viewport default intentionally changes spawning;
-                # its qualification is tests/widescreen/defaults.py instead.
-                profile=['--widescreen',args.widescreen,'--widescreen-enemies','classic','--widescreen-camera','centered']
+                profile=['--widescreen',args.widescreen]
                 opts += profile+['--present-out',str(out/f'{name}.present.png')]
                 iopts += profile+['--present-out',str(out/'interp'/f'{name}.present.png')]
             if args.audio:
@@ -66,7 +63,9 @@ def replay(args):
             checks={f'before{ext}':(reference_state if ext=='.cycstate' else stem.with_suffix(ext)).read_bytes()==Path(r['state']).with_suffix(ext).read_bytes()
                     for ext in ('.hash','.png','.cycstate')}
             if args.widescreen:
-                checks['before.cycstate']=machine(reference_state)==machine(r['state'])
+                # Widescreen deliberately changes enemy activation. Qualify
+                # this profile against the interpreter, not stock simulation.
+                checks={}
             if i:
                 checks.update({f'interpreter{ext}':Path(i['state']).with_suffix(ext).read_bytes()==Path(r['state']).with_suffix(ext).read_bytes()
                                for ext in ('.hash','.png','.cycstate')})
@@ -76,14 +75,15 @@ def replay(args):
                 # Recording enables the APU output resampler; its serialized
                 # filter history differs from a run with no audio sink. Full
                 # APU/state and WAV parity still compare native vs interpreter.
-                checks.pop('before.cycstate')
-                checks['before.non_audio_state']=machine(reference_state,(b'MOD ',b'APU '))==machine(r['state'],(b'MOD ',b'APU '))
+                checks.pop('before.cycstate',None)
+                if not args.widescreen:
+                    checks['before.non_audio_state']=machine(reference_state,(b'MOD ',b'APU '))==machine(r['state'],(b'MOD ',b'APU '))
                 wav=(out/f'{name}.wav').read_bytes()
                 if i:checks['interpreter.wav']=wav==(out/'interp'/f'{name}.wav').read_bytes()
                 checks['audio-samples']=len(wav)>44 and any(wav[44:])
             log=stem.with_suffix('.log').read_text(errors='replace')
             rows.append(dict(case=str(stem),checks=checks,passed=all(checks.values()),
-                             interpreted_rom_before=mp_run._interp(log,'ROM'),interpreted_rom_after=r['interp_rom'],
+                             interpreted_rom_before=None if args.widescreen else mp_run._interp(log,'ROM'),interpreted_rom_after=r['interp_rom'],
                              executed_cycles=r['cycles']-(cycstate.cycles(state.read_bytes()) if state else 0)))
             (args.output/'results.json').write_text(json.dumps(rows,indent=1)+'\n',newline='\n')
             print(str(stem),checks,'ROM',rows[-1]['interpreted_rom_before'],'->',r['interp_rom'],flush=True)
@@ -96,8 +96,11 @@ if __name__=='__main__':
     ap.add_argument('sources',type=Path,nargs='+')
     ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--exe',type=Path,default=mp_run.EXE)
-    ap.add_argument('--widescreen',choices=('32:9',),help='stock-preserving Classic/Centered presentation parity')
+    ap.add_argument('--widescreen',choices=('32:9',),help='fixed widescreen behavior: native/interpreter simulation and presentation parity')
     ap.add_argument('--match',help='only segment labels matching this regular expression')
     ap.add_argument('--audio',action='store_true',help='retain and compare muted emulated WAV output')
     ap.add_argument('--native-only',action='store_true',help='compare against the recorded build without another interpreter run')
-    replay(ap.parse_args())
+    args=ap.parse_args()
+    if args.widescreen and args.native_only:
+        ap.error('--widescreen requires its interpreter comparison')
+    replay(args)

@@ -37,8 +37,6 @@ def run(out, name, frames, state=None, route='', assist=None, pokes=(), shots=0,
     """frames: how many frames to run from the state. Returns a result dict."""
     out = Path(out)
     out = out.resolve()
-    if out.drive.upper() == 'C:':
-        raise ValueError('headless evidence and runtime scratch must be on F: or G:')
     out.mkdir(parents=True, exist_ok=True)
     scratch = out / '.tmp'
     scratch.mkdir(exist_ok=True)

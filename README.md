@@ -9,7 +9,8 @@ X is B, Enter is START, and backslash is SELECT. Escape opens the menu; controls
 can be remapped. F8/F9 save and load execution snapshots. Snapshots are disposable
 and specific to a build. Keep the game's passwords for persistent progress.
 
-Adaptive widescreen is an optional mod in the Display group. Fit follows the
+Adaptive widescreen is an optional mod in the Display group. Aspect is its only
+setting. Fit follows the
 window's aspect; 16:9, 21:9, and 32:9 are also available. Enemies activate across
 the wider view, and the stage camera stops at level edges. The HUD and boss
 rooms stay centered. See [WIDESCREEN.md](WIDESCREEN.md) for behavior and validation.
@@ -32,7 +33,8 @@ New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null
 
 Put `monsterparty.nes` beside this README or pass `-Rom`. Build products, original
 game data, save states, diagnostics and Ghidra databases are ignored. Source and
-tool text use LF line endings. Keep temporary files and runtime data off C:.
+tool text use LF line endings. Prefer an unsaturated drive for bulk temporary
+data, and clean up disposable builds and caches after use. C: is also supported.
 
 ## Headless coverage
 

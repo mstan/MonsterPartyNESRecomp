@@ -10,7 +10,6 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $build = [IO.Path]::GetFullPath($(if ([IO.Path]::IsPathRooted($BuildDir)) { $BuildDir } else { Join-Path $root $BuildDir }))
 $out = [IO.Path]::GetFullPath($OutputDir)
-if ($build -match '^C:' -or $out -match '^C:') { throw 'Release output and staging must be on non-C: storage.' }
 if ([IO.Path]::GetFileName($ArchiveName) -ne $ArchiveName) { throw 'ArchiveName must be a filename.' }
 $env:TEMP = $env:TMP = Join-Path $build 'tmp'
 New-Item -ItemType Directory -Path $env:TEMP -Force | Out-Null

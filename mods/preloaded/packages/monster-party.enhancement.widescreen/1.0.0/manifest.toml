@@ -43,28 +43,3 @@ label = "21:9"
 value = "32-9"
 label = "32:9"
 
-[[option]]
-feature = "widescreen"
-id = "enemy_activation"
-label = "Enemy activation"
-type = "choice"
-default = "viewport"
-[[option.choice]]
-value = "classic"
-label = "Original spawning and culling"
-[[option.choice]]
-value = "viewport"
-label = "Spawn and keep enemies throughout the wide view"
-
-[[option]]
-feature = "widescreen"
-id = "camera"
-label = "Camera"
-type = "choice"
-default = "anchored"
-[[option.choice]]
-value = "centered"
-label = "Keep the original screen centered"
-[[option.choice]]
-value = "anchored"
-label = "Stop at area edges (no empty space)"

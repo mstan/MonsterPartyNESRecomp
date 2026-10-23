@@ -13,15 +13,18 @@ The bottom HUD stays centered and its background extends across the picture.
 Single-screen rooms use backdrop margins. Title/round cards and game-over scenes
 retain the native picture. The game's split-line artifact at line 192 remains.
 
-Original enemy spawning/culling is the default and preserves simulation hashes.
-Viewport activation is a separate experimental choice: it activates authored
-enemies across the wider view and keeps them alive there. The game has only three
+Viewport activation is the widescreen default: it activates authored enemies
+across the wider view and keeps them alive there. The game has only three
 ordinary enemy slots, so this can change timing, difficulty and which enemies fit
 in those slots. The spawn ledger suppresses a second activation when an enemy's
-column later reaches the native edge. Boss-room spawning remains original.
+column later reaches the native edge. Original spawning/culling remains available
+as the Classic option. Boss-room spawning and culling remain original.
 
-Centered camera preserves the original screen's centered placement. Anchored
-camera shifts the scrolling playfield near area edges; the HUD remains centered.
+The default Anchored camera shifts the scrolling playfield near area edges to
+avoid showing space outside the level. The HUD remains independently centered.
+Boss arenas and single-screen rooms retain the native centered composition;
+the guardian-area flag explicitly excludes arenas from stage-edge anchoring.
+The optional Centered camera preserves the original screen's centered placement.
 Viewport activation computes that camera directly from the simulation, so its
 behavior does not depend on presentation frequency. A regression compares every
 frame, every 60 frames, and final-only composition, plus interpreter parity.
@@ -57,4 +60,12 @@ Run `tests/widescreen/validate.py` for the round matrix and
 `tests/widescreen/scenes.py` for checkpoint and margin-sprite checks. Commands,
 routes, native/presentation pictures, full states and JSON diagnostics are retained
 under the specified non-C: evidence directory. `tests/coverage/replay.py
---widescreen 32:9` adds presentation parity to recorded campaign routes.
+--widescreen 32:9` adds stock-preserving Classic/Centered presentation parity
+to recorded campaign routes.
+
+`tests/widescreen/defaults.py` checks the owner playtest regressions using the
+actual widescreen defaults: wider enemy activation, no duplicate spawn columns,
+native/interpreter and save/load parity, an unchanged centered HUD, and centered
+guardian rooms with stock machine behavior. It also reproduces the 1992x720 Fit
+window from the owner screenshot and compares the leftmost native playfield
+pixels directly, so a black outside-level margin cannot pass as anchored terrain.

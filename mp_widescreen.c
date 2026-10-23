@@ -69,7 +69,7 @@ typedef struct {
 static WsState ws;
 
 /* ---- settings ---- */
-static int enabled, viewport, anchored, aspect = NES_VIDEO_FIT;
+static int enabled, viewport = 1, anchored = 1, aspect = NES_VIDEO_FIT;
 static FILE *report;
 static uint64_t report_frame;
 
@@ -140,7 +140,9 @@ static int scene(void)
     /* $31: the status-bar split runs; $0449: object sprites are composed;
      * ($62): an area's page table is loaded (zero on the round card). */
     if (!R(0x31) || !R(0x449) || !ptr(0x62) || !ptr(0x60) || !ptr(0x64) || !ptr(0x66)) return SCENE_NONE;
-    return R(0x32E) ? SCENE_SCROLL : SCENE_ROOM;
+    /* Guardian arenas keep their native, centered composition even when an
+     * arena's loaded map has more than one page. The HUD has its own origin. */
+    return R(0x32E) && !(R(0x52) & 0x80) ? SCENE_SCROLL : SCENE_ROOM;
 }
 static int world_width(void) { return (R(0x32E) + 1) * 256; }
 static int game_camera(void) { return R(0x50) * 256 + R(0x25); }
@@ -538,10 +540,10 @@ static void enable(int on)
     cyc_render_set_compositor(on ? render : NULL, NULL);
     memset(&ws, 0, sizeof ws);
 }
-static void reset_mod(void) { viewport = 0; anchored = 0; enable(0); }
+static void reset_mod(void) { viewport = 1; anchored = 1; enable(0); }
 static void activate(void)
 {
-    char a[32] = "fit", e[32] = "classic", c[32] = "centered";
+    char a[32] = "fit", e[32] = "viewport", c[32] = "anchored";
     nes_mod_option_value(WS_PACKAGE, "widescreen", "aspect", a, sizeof a);
     nes_mod_option_value(WS_PACKAGE, "widescreen", "enemy_activation", e, sizeof e);
     nes_mod_option_value(WS_PACKAGE, "widescreen", "camera", c, sizeof c);

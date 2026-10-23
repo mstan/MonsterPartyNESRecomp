@@ -1,8 +1,9 @@
 # Monster Party (USA) validation
 
 ROM payload CRC32 `02B9E7C2`; NESRecomp `a76140c`; recomp-ui `7c635c6`.
-All runs were headless or explicitly hidden, with speaker output muted. No
-visible game/launcher window was opened. Fixtures and commands are retained.
+Automated validation runs were headless or explicitly hidden, with speaker
+output muted. Fixtures and commands are retained. Owner-requested interactive
+handoffs use normal visible windows and enabled audio.
 
 ## Content and transitions
 
@@ -83,19 +84,40 @@ The first-run launcher, verified-ROM dashboard, settings and controller screens
 were visually inspected in a hidden software-rendered session. The validator
 checked that every owned window stayed hidden and that OpenGL came from private
 Mesa DLLs. Configuration and caches stayed on G:. Defaults are windowed mode,
-audio enabled and volume 100. The software-renderer DLLs are test tools only.
+audio enabled and volume 100. Private software-renderer DLLs stay outside the
+release archive.
 
-The non-trace release binary passes all 88 round-matrix checks. All 385 selected
-segments also pass at 32:9: machine state and native hashes/pictures match stock,
+The non-trace release round matrix has 88 checks. The original campaign
+qualification recorded 385 passing segments at 32:9 using Classic activation
+and the Centered camera:
+machine state and native hashes/pictures match stock,
 and native/interpreter presentation pictures and complete states match exactly.
 The final driver also passes a fresh round-7 room/optional-guardian/exit chain
 at 32:9 with parity enabled.
 
-The audited archive is `release/MonsterParty-windows-x64.zip` (36 entries):
-SHA256 `742B15B48BC604263A076A67FE1B2C2CC8F4845A50D13F5FBA19315C2FC13DFF`.
+Owner playtest feedback changed the widescreen defaults to Viewport activation
+and the Anchored stage camera. This profile deliberately changes enemy timing;
+the stock-identity corpus above uses its explicit original profile. The new
+default regression checks pass on all eight 900-frame round routes, covering
+wider activation, unique spawn columns, a fixed centered HUD, native/interpreter
+parity and current-build save/load. The exact 1992x720 Fit reproduction and a
+right-edge checkpoint have no outside-level void. All 44 door-room checkpoints
+plus the final-boss checkpoint keep centered native composition and stock machine
+state/hashes, with full native/interpreter parity. The owner playtested the
+updated behavior and confirmed it looked good.
+The updated release also passes the full 88-check rendering matrix and all 16
+real-catalog checks, including enabled features with the new option defaults.
+Their evidence is in `wide-evidence/owner-fix/matrix` and `catalog` in the
+repository workspace.
+
+The updated archive is
+`release/MonsterParty-windows-x64-20261023-playtest.zip` (36 entries):
+SHA256 `472C0BA89336ED98EE972BBCE29E08403493BFDF33C841938C0884396C01B2F6`.
 Its executable matches the tested non-trace binary. The archive includes the
 recomp-ui, font/image and dependency notices, and contains no ROM, player data,
 test software renderer, or either forbidden loading-mod package.
+The earlier `MonsterParty-windows-x64.zip` is retained as the original release;
+it still has the earlier Classic/Centered defaults.
 
 ## Evidence
 
@@ -112,6 +134,9 @@ The main evidence root is `G:/Temp/Codex/MonsterPartyNESRecomp/`:
   `coverage/replay-wide-maze2`: complete selected 32:9 parity corpus.
 - `wide/matrix1`, `wide/catalog1`, `wide/viewport-all`, `wide/viewport-save1`,
   `wide/scenes3`: widescreen acceptance evidence.
+- `wide/defaults-owner1`, `wide/defaults-owner2`, `wide/defaults-edges-final`:
+  updated defaults, HUD and centered-arena regressions. `owner-boss-inputs.json`
+  retains the exact 44 door-room input paths.
 - `ui-evidence1`: launcher pictures, settings, loaded-module and hidden-window checks.
 
 `evidence/preseed-maze` in the repository workspace supplies the matching old

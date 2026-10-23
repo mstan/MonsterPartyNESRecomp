@@ -52,8 +52,12 @@ def replay(args):
                     opts += [option,cmd[cmd.index(option)+1]]
             iopts=opts.copy()
             if args.widescreen:
-                opts += ['--widescreen',args.widescreen,'--present-out',str(out/f'{name}.present.png')]
-                iopts += ['--widescreen',args.widescreen,'--present-out',str(out/'interp'/f'{name}.present.png')]
+                # This comparison promises stock simulation identity. The
+                # current viewport default intentionally changes spawning;
+                # its qualification is tests/widescreen/defaults.py instead.
+                profile=['--widescreen',args.widescreen,'--widescreen-enemies','classic','--widescreen-camera','centered']
+                opts += profile+['--present-out',str(out/f'{name}.present.png')]
+                iopts += profile+['--present-out',str(out/'interp'/f'{name}.present.png')]
             if args.audio:
                 opts += ['--wav-out',str(out/f'{name}.wav')]
                 iopts += ['--wav-out',str(out/'interp'/f'{name}.wav')]
@@ -92,7 +96,7 @@ if __name__=='__main__':
     ap.add_argument('sources',type=Path,nargs='+')
     ap.add_argument('--output',type=Path,required=True)
     ap.add_argument('--exe',type=Path,default=mp_run.EXE)
-    ap.add_argument('--widescreen',choices=('32:9',))
+    ap.add_argument('--widescreen',choices=('32:9',),help='stock-preserving Classic/Centered presentation parity')
     ap.add_argument('--match',help='only segment labels matching this regular expression')
     ap.add_argument('--audio',action='store_true',help='retain and compare muted emulated WAV output')
     ap.add_argument('--native-only',action='store_true',help='compare against the recorded build without another interpreter run')

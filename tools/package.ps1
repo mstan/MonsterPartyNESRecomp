@@ -38,6 +38,10 @@ $licenses = @{
     'NESRecomp-LICENSE.txt' = (Join-Path $root 'nesrecomp/LICENSE')
     'SDL2-COPYING.txt' = (Join-Path $root 'nesrecomp/runner/external/SDL2/COPYING.txt')
     'ImGui-LICENSE.txt' = (Join-Path $root 'recomp-ui/src/third_party/imgui/LICENSE.txt')
+    'recomp-ui-LICENSE.txt' = (Join-Path $root 'recomp-ui/LICENSE')
+    'Fonts-NOTICE.md' = (Join-Path $root 'recomp-ui/assets/common/fonts/NOTICE.md')
+    'Images-NOTICE.md' = (Join-Path $root 'recomp-ui/assets/common/img/NOTICE.md')
+    'OFL-1.1.txt' = (Join-Path $root 'assets/licenses/OFL-1.1.txt')
     'Artwork-SOURCE.txt' = (Join-Path $root 'assets/SOURCE.txt')
 }
 New-Item -ItemType Directory -Path (Join-Path $stage 'licenses') | Out-Null

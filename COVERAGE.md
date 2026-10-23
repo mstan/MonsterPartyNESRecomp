@@ -85,8 +85,9 @@ checked that every owned window stayed hidden and that OpenGL came from private
 Mesa DLLs. Configuration and caches stayed on G:. Defaults are windowed mode,
 audio enabled and volume 100. The software-renderer DLLs are test tools only.
 
-Final 32:9 campaign replay and the non-trace release matrix are running; their
-completion is required before the validation branch is merged into master.
+The non-trace release binary passes all 88 round-matrix checks. Final 32:9
+campaign replay is running; its completion is required before the validation
+branch is merged into master.
 
 ## Evidence
 
@@ -107,3 +108,5 @@ The main evidence root is `G:/Temp/Codex/MonsterPartyNESRecomp/`:
 executable runs for the final round-6/7 routes. `wide-evidence/anchored-final` and
 `wide-evidence/far-sprite-final` retain anchored regressions. Generated states,
 images, audio, ROM data and diagnostic logs are ignored and are not release files.
+The 16:9/21:9/32:9 round-start and scrolled contact sheets are in
+`wide-evidence/contact-points/starts.png` and `scrolled.png`.

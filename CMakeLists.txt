@@ -31,5 +31,10 @@ nesrecomp_add_cycle_game(MonsterPartyRecomp
     GAME_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/game.toml"
     RECOMPILER "${NESRECOMP_HOST_COMPILER}"
     SEED_FILE "${NESRECOMP_CYCLE_SEEDS}"
+    MODS GAME_ID "monster-party-usa"
+    HOST_EXTRAS mp_host.c mp_assist.c
     PLAYERS 1 REGION NTSC)
 target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+add_custom_command(TARGET MonsterPartyRecomp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded" "$<TARGET_FILE_DIR:MonsterPartyRecomp>/mods")

@@ -65,7 +65,7 @@ def validate(args):
             base=run(out,'base',state,frames=120,exe=args.base,report=False)
             disabled=run(out,'default',state,frames=120,extra=['--mods-root',str(catalog)])
             record(f'round{n}/catalog-default',hash=same(base,disabled,'.hash'),picture=same(base,disabled,'.png'),state=same(base,disabled,'.cycstate'))
-            config='[[package]]\nid = "monster-party.enhancement.widescreen"\nversion = "1.0.0"\n\n[[feature]]\npackage_id = "monster-party.enhancement.widescreen"\nid = "widescreen"\nenabled = true\n[feature.values]\naspect = "32-9"\nenemy_activation = "classic"\ncamera = "centered"\n'
+            config='[[package]]\nid = "monster-party.enhancement.widescreen"\nversion = "1.0.0"\n\n[[feature]]\npackage_id = "monster-party.enhancement.widescreen"\nid = "widescreen"\nenabled = true\n[feature.values]\naspect = "32-9"\n'
             (catalog/'state.toml').write_text(config,newline='\n')
             enabled=run(out,'enabled',state,frames=120,extra=['--mods-root',str(catalog)])
             cli=run(out,'cli',state,frames=120,extra=['--widescreen','32:9'])
@@ -111,14 +111,15 @@ def validate(args):
         record(f'round{n}/catalog-default', hash=same(base,r,'.hash'), state=same(base,r,'.cycstate'))
         for aspect, width in [('16:9',426),('21:9',560),('32:9',854)]:
             name = aspect.replace(':','-')
-            r = run(out, name, state, extra=['--widescreen',aspect])
+            classic = ['--widescreen',aspect,'--widescreen-enemies','classic','--widescreen-camera','centered']
+            r = run(out, name, state, extra=classic)
             size = struct.unpack('>II', r['stem'].with_suffix('.present.png').read_bytes()[16:24])
             record(f'round{n}/{name}', hash=same(base,r,'.hash'), machine=machine(base['state']) == machine(r['state']),
                    size=size == (width,240), sampled=any(row['terrain_samples'] > 0 for row in r['rows']),
                    terrain=all(row['terrain_errors']==0 for row in r['rows']),
                    isolated=all(row['failures']==0 and row['mod_failures']==0 and row['overflow']==0 for row in r['rows']))
             if aspect == '32:9':
-                i = run(out, name+'-interp', state, extra=['--widescreen',aspect], interp=True)
+                i = run(out, name+'-interp', state, extra=classic, interp=True)
                 record(f'round{n}/32-9-parity', **{ext:same(r,i,ext) for ext in ('.hash','.png','.present.png','.cycstate')})
         for drawable, width in [('1280x720',426),('3840x1080',854),('1024x960',256)]:
             r = run(out, 'fit-'+drawable, state, frames=120, extra=['--widescreen','fit','--present-size',drawable])

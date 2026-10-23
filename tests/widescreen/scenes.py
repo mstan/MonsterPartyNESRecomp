@@ -21,8 +21,9 @@ def main(args):
     def run(name,state,frames=120,wide=True,interp=False):
         out=args.output/name
         extra=['--present-out',str(out.with_suffix('.present.png'))]
-        if wide:extra+=['--widescreen','32:9','--widescreen-report',str(out.with_suffix('.jsonl'))]
-        if wide and args.anchored:extra+=['--widescreen-camera','anchored']
+        if wide:extra+=['--widescreen','32:9','--widescreen-report',str(out.with_suffix('.jsonl')),
+                        '--widescreen-camera','anchored' if args.anchored else 'centered',
+                        '--widescreen-enemies','classic']
         r=mp_run.run(args.output,name,frames,state=state,extra=extra,exe=args.exe,interp=interp)
         r['stem']=out
         r['rows']=[json.loads(s) for s in out.with_suffix('.jsonl').read_text().splitlines()] if wide else []

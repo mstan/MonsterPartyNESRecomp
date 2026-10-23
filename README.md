@@ -10,8 +10,9 @@ can be remapped. F8/F9 save and load execution snapshots. Snapshots are disposab
 and specific to a build. Keep the game's passwords for persistent progress.
 
 Adaptive widescreen is an optional mod in the Display group. Fit follows the
-window's aspect; 16:9, 21:9, and 32:9 are also available. Original enemy activation
-is the default. See [WIDESCREEN.md](WIDESCREEN.md) for behavior and validation.
+window's aspect; 16:9, 21:9, and 32:9 are also available. Enemies activate across
+the wider view, and the stage camera stops at level edges. The HUD and boss
+rooms stay centered. See [WIDESCREEN.md](WIDESCREEN.md) for behavior and validation.
 The content audit, determinism results and release checks are in
 [COVERAGE.md](COVERAGE.md).
 

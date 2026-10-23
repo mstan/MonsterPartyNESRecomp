@@ -59,7 +59,8 @@ F8/F9: save/load execution snapshot. Snapshots are specific to this build.
 Keep the game's passwords for persistent progress.
 
 Adaptive widescreen is optional under Display. Fit follows the window shape.
-Original enemy spawning/culling is the default. See WIDESCREEN.md for details.
+Enemies activate across the wider view and the camera stops at stage edges.
+The HUD and boss rooms stay centered. See WIDESCREEN.md for details.
 
 '@
 [IO.File]::WriteAllText((Join-Path $stage 'README.txt'),$readme.Replace("`r`n","`n"),[Text.UTF8Encoding]::new($false))

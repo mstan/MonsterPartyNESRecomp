@@ -27,7 +27,7 @@ def harvest(misses, label, seeds=ROOT / 'cyc_seeds.txt'):
                 have.add(key)
                 added.append(line.strip())
     if added:
-        seeds.write_text(old.rstrip('\n') + f'\n\n# {label}\n' + '\n'.join(added) + '\n')
+        seeds.write_text(old.rstrip('\n') + f'\n\n# {label}\n' + '\n'.join(added) + '\n', newline='\n')
     return added
 
 

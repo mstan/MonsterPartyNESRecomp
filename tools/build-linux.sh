@@ -5,7 +5,7 @@ rom="$repo/monsterparty.nes"
 build="$repo/build-linux"
 python=python3
 jobs=4
-version=0.1.1
+version=0.1.2
 cmake_args=()
 while [ "$#" -gt 0 ]; do
     case "$1" in

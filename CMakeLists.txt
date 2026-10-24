@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(MonsterPartyRecomp VERSION 0.1.1 LANGUAGES C CXX)
+project(MonsterPartyRecomp VERSION 0.1.2 LANGUAGES C CXX)
 set(NESRECOMP_GAME_VERSION "${PROJECT_VERSION}" CACHE STRING "Game release version")
 set(NESRECOMP_BACKEND "cycle" CACHE STRING "Execution backend (cycle only)")
 if(NOT NESRECOMP_BACKEND STREQUAL "cycle")
@@ -40,10 +40,26 @@ nesrecomp_add_cycle_game(MonsterPartyRecomp
     RECOMPILER "${NESRECOMP_HOST_COMPILER}"
     SEED_FILE "${NESRECOMP_CYCLE_SEEDS}"
     MODS GAME_ID "monster-party-usa"
-    HOST_EXTRAS src/mp_host.c src/mp_assist.c src/mp_widescreen.c
+    HOST_EXTRAS src/mp_host.c src/mp_assist.c src/mp_widescreen.c src/mp_mods.c
     BOXART "${CMAKE_CURRENT_SOURCE_DIR}/assets/boxart.tga"
     PLAYERS 1 REGION NTSC)
 target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+option(MONSTERPARTY_MOD_TESTS "Run isolated cartridge cheat probes at startup (developer QA)" OFF)
+if(MONSTERPARTY_MOD_TESTS)
+    target_sources(MonsterPartyRecomp PRIVATE tests/mods/probe.c)
+    set_source_files_properties(src/mp_host.c PROPERTIES COMPILE_DEFINITIONS MP_MOD_TESTS=1)
+endif()
+set(_restoration_ips "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded/packages/monster-party.content.prototype-restoration/1.0.0/restoration.ips")
+file(SHA256 "${_restoration_ips}" _restoration_sha)
+if(NOT _restoration_sha STREQUAL "c5eac2f185abeefd585235516a5dadc4ef2c271794dd4bdb6906bc82d04e52d8")
+    message(FATAL_ERROR "Prototype Restoration IPS differs from Cubivore10's original patch")
+endif()
+file(READ "${_restoration_ips}" _restoration_hex HEX)
+string(REGEX REPLACE "(..)" "0x\\1," _restoration_values "${_restoration_hex}")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/mp_restoration_patch.h"
+    "/* Prototype Restoration 1.0 by Cubivore10. See the mod's NOTICE.txt. */\nstatic const uint8_t mp_restoration_patch[] = {${_restoration_values}};\n")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_restoration_ips}")
+target_include_directories(MonsterPartyRecomp PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 add_custom_command(TARGET MonsterPartyRecomp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/mods/preloaded" "$<TARGET_FILE_DIR:MonsterPartyRecomp>/mods")

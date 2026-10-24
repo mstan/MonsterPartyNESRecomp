@@ -3,8 +3,8 @@ param(
     [string]$Rom = (Join-Path (Split-Path -Parent $PSScriptRoot) 'monsterparty.nes'),
     [string]$BuildDir = 'build-release',
     [string]$OutputDir = (Join-Path (Split-Path -Parent $PSScriptRoot) 'release'),
-    [string]$ArchiveName = 'MonsterParty-0.1.1-windows-x64.zip',
-    [string]$ReleaseVersion = '0.1.1',
+    [string]$ArchiveName = 'MonsterParty-0.1.2-windows-x64.zip',
+    [string]$ReleaseVersion = '0.1.2',
     [switch]$SkipBuild
 )
 $ErrorActionPreference = 'Stop'
@@ -21,6 +21,7 @@ if ($cache -notmatch ('(?m)^NESRECOMP_GAME_VERSION:STRING='+[regex]::Escape($Rel
 }
 if ($cache -notmatch '(?m)^NESRECOMP_BACKEND:STRING=cycle\r?$' -or
     $cache -notmatch '(?m)^NESRECOMP_ENABLE_TRACE:BOOL=OFF\r?$' -or
+    $cache -notmatch '(?m)^MONSTERPARTY_MOD_TESTS:BOOL=OFF\r?$' -or
     $cache -match '(?m)^NESRECOMP_HEADLESS:BOOL=ON\r?$') { throw 'Expected the non-trace cycle build with launcher UI.' }
 foreach ($file in 'MonsterPartyRecomp.exe','SDL2.dll','assets/img/boxart.tga') {
     if (-not (Test-Path -LiteralPath (Join-Path $build $file))) { throw "Missing release dependency: $file" }

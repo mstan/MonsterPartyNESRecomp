@@ -571,6 +571,8 @@ bool mp_ws_option(const char *name, const char *value)
 
 void mp_ws_power_on(void)
 {
+    /* Content mods may replace level data and CHR before the first frame. */
+    memset(prg_ok, 0, sizeof prg_ok); memset(chr_ok, 0, sizeof chr_ok);
     memset(&ws, 0, sizeof ws);
     report_frame = 0;
 }

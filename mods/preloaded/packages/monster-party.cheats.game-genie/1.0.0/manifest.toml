@@ -1,0 +1,152 @@
+format_version = 1
+id = "monster-party.cheats.game-genie"
+version = "1.0.0"
+name = "Monster Party Cheats"
+author = "Galoob, Ugetab, megaman_exe; NESRecomp integration"
+description = "Optional cheats based on documented Game Genie codes. Choose only the ones you want."
+license = "PolyForm-Noncommercial-1.0.0 (integration); see NOTICE.txt"
+resolver = "declarative"
+save_compatibility = "custom"
+
+[[target]]
+game_id = "monster-party-usa"
+rom_crc32 = "02b9e7c2"
+
+[[feature]]
+id = "invincibility"
+name = "Invincibility"
+description = "Take no damage from enemies or guardians."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "invincibility"
+id = "monster-party.cheats.invincibility"
+
+[[feature]]
+id = "one-hit"
+name = "One-hit Kills"
+description = "Defeat the selected enemies with one landed hit."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "one-hit"
+id = "monster-party.cheats.one-hit"
+[[option]]
+feature = "one-hit"
+id = "targets"
+label = "Targets"
+type = "choice"
+default = "both"
+[[option.choice]]
+value = "enemies"
+label = "Regular enemies"
+[[option.choice]]
+value = "guardians"
+label = "Guardians"
+[[option.choice]]
+value = "both"
+label = "Both"
+
+[[feature]]
+id = "endless-bert"
+name = "Endless Bert"
+description = "Stay transformed after collecting a pill. Turn this off to let Mark return."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "endless-bert"
+id = "monster-party.cheats.endless-bert"
+
+[[feature]]
+id = "energy"
+name = "Starting Energy"
+description = "Choose how much energy Mark starts with."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "energy"
+id = "monster-party.cheats.energy"
+[[option]]
+feature = "energy"
+id = "amount"
+label = "Energy"
+type = "choice"
+default = "normal"
+[[option.choice]]
+value = "normal"
+label = "Normal"
+[[option.choice]]
+value = "boosted"
+label = "Boosted"
+[[option.choice]]
+value = "super"
+label = "Super-boosted"
+
+[[feature]]
+id = "round"
+name = "Starting Round"
+description = "Start a new game on any of the eight rounds."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "round"
+id = "monster-party.cheats.round"
+[[option]]
+feature = "round"
+id = "number"
+label = "Round"
+type = "integer"
+default = 1
+min = 1
+max = 8
+step = 1
+
+[[feature]]
+id = "speed"
+name = "Walking Speed"
+description = "Make Mark walk faster."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "speed"
+id = "monster-party.cheats.speed"
+[[option]]
+feature = "speed"
+id = "amount"
+label = "Speed"
+type = "choice"
+default = "1"
+[[option.choice]]
+value = "1"
+label = "Normal"
+[[option.choice]]
+value = "2"
+label = "2x"
+[[option.choice]]
+value = "4"
+label = "4x"
+
+[[feature]]
+id = "jump"
+name = "Jump Height"
+description = "Give Mark a higher jump."
+group = "Cheats"
+default_enabled = false
+[[plugin]]
+feature = "jump"
+id = "monster-party.cheats.jump"
+[[option]]
+feature = "jump"
+id = "height"
+label = "Height"
+type = "choice"
+default = "normal"
+[[option.choice]]
+value = "normal"
+label = "Normal"
+[[option.choice]]
+value = "high"
+label = "High"
+[[option.choice]]
+value = "extra"
+label = "Extra high"

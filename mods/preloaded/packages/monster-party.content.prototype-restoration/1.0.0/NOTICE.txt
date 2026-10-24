@@ -1,0 +1,14 @@
+Prototype Restoration 1.0 for Monster Party (USA)
+Author and hacking: Cubivore10
+
+Original source: https://www.romhacking.net/hacks/1516/
+Current archive: https://www.romhack.ing/hacks/1516/
+
+The included restoration.ips is the author's original, unmodified patch.
+SHA-256: c5eac2f185abeefd585235516a5dadc4ef2c271794dd4bdb6906bc82d04e52d8
+The patch is embedded in the executable and applied in memory only when enabled.
+Your original ROM file is never changed. No complete game ROM is included.
+
+Cubivore10 is credited for the restoration, not the recompiled port or its
+widescreen implementation. The project's code license does not relicense this
+third-party patch. Monster Party belongs to its respective rights holders.

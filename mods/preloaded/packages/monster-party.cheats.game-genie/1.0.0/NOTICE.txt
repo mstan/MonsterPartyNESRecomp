@@ -1,0 +1,20 @@
+Monster Party cheat sources and credits
+
+https://gamehacking.org/game/30365
+https://gamegenie.com/cheats/gamegenie/nes/monster_party.html
+
+Galoob: starting energy and starting-round codes.
+Ugetab: Invincible (AVOEZYSZ), one-hit regular enemies (EYEEIIEL),
+and one-hit guardians (AAUEUIZA).
+megaman_exe: Endless Bert (SZKEAAVT), walking speed and jump-height codes.
+
+Starting energy: APUPZSGE + AOKPTKGE (boosted), GZUPZSGE + GXKPTKGE (super).
+Starting round: PAKOZIAA through YAKOZIAA (rounds 2 through 8).
+Walking speed: VNKETXNN + ZEUEAZPA (2x), KNKETXNN + GEUEAZPA (4x).
+High jump: APSAIIGA + APSATIGA + AASAYIGE.
+Extra high jump: AZSAIIGA + APSATIGA + AASAYIGE.
+
+The recompiled integration uses bank-qualified read substitutions and native
+hooks that preserve the game's own hit/defeat paths. It does not apply opcode
+patches to compiled instructions. Endless Bert freezes its transformation timer
+after a pill is collected. No ROM bytes or game ROM are distributed here.

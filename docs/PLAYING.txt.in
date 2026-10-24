@@ -14,6 +14,16 @@ Fit follows your window; 16:9, 21:9 and 32:9 are also available. Enemies appear
 across the wider view, and the stage camera stops at level edges. The HUD and
 boss rooms stay centered.
 
+CHEATS AND RESTORATION
+
+Mods > Cheats includes invincibility, one-hit kills, Endless Bert, starting
+energy and round, walking speed, and jump height. All start disabled.
+Mods > Restoration includes Prototype Restoration 1.0 by Cubivore10, restoring
+title colors, monster artwork and scenery. Select it before starting the game.
+It supports widescreen, save states and rewind, and never changes your ROM file.
+Source: https://www.romhacking.net/hacks/1516/
+Current archive: https://www.romhack.ing/hacks/1516/
+
 CONTROLS AND PROGRESS
 
 Arrow keys: move. Z: A. X: B. Enter: Start. Backslash: Select.
@@ -25,6 +35,8 @@ choose, X to save, A to load/resume, B to close. Rewind starts enabled; change
 its history settings in the launcher.
 Save states are specific to a build; keep the game's passwords for progress
 you want to carry into an update.
+Use the same cheat settings when loading a save state. Changing mods starts
+a fresh rewind history.
 
 UPDATES AND HELP
 

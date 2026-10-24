@@ -25,6 +25,8 @@ def stage(build, output, version):
         'Images-NOTICE.md': ROOT / 'recomp-ui/assets/common/img/NOTICE.md',
         'OFL-1.1.txt': ROOT / 'assets/licenses/OFL-1.1.txt',
         'Artwork-SOURCE.txt': ROOT / 'assets/SOURCE.txt',
+        'Prototype-Restoration-NOTICE.txt': ROOT / 'mods/preloaded/packages/monster-party.content.prototype-restoration/1.0.0/NOTICE.txt',
+        'Cheats-NOTICE.txt': ROOT / 'mods/preloaded/packages/monster-party.cheats.game-genie/1.0.0/NOTICE.txt',
     }
     (output / 'licenses').mkdir(exist_ok=True)
     for name, source in notices.items():
@@ -45,6 +47,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--version', default='0.1.1')
+    parser.add_argument('--version', default='0.1.2')
     args = parser.parse_args()
     stage(args.build, args.output, args.version)

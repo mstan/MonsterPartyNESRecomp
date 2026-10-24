@@ -3,9 +3,16 @@
 #include "cyc_host_extras.h"
 #include "mp_assist.h"
 #include "mp_widescreen.h"
+#include "mp_mods.h"
 #include <string.h>
 
-static void power_on(void *ctx) {(void)ctx;mp_assist_power_on();mp_ws_power_on();}
+static void power_on(void *ctx) {
+    (void)ctx;mp_mods_power_on();mp_assist_power_on();mp_ws_power_on();
+#ifdef MP_MOD_TESTS
+    void mp_mods_probe(void);
+    mp_mods_probe();
+#endif
+}
 static void frame_begin(void *ctx) {(void)ctx;mp_assist_frame_begin();}
 static void frame_end(void *ctx) {(void)ctx;mp_assist_frame_end();mp_ws_frame_end();}
 static bool option(void *ctx,const char *name,const char *value) {

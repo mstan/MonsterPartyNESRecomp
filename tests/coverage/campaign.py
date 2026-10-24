@@ -48,6 +48,8 @@ class Chain:
         name = f'{self.n:03d}-{label}'
         self.n += 1
         extra = list(getattr(self.args, 'extra', ()))
+        if getattr(self.args, 'assist', None) is not None:
+            assist = self.args.assist or None
         if getattr(self.args, 'widescreen', None):
             extra += ['--widescreen', self.args.widescreen, '--present-out', str(self.out / f'{name}.present.png')]
         exe = getattr(self.args, 'exe', mp_run.EXE)
@@ -107,10 +109,26 @@ def warp_writes(world_x, row, request_door):
     return w
 
 
+def reflect(first, frames):
+    """Face the projectile boss, hold position and jump into its shot height.
+    Invincibility removes knockback, so walking into the corner misses shots."""
+    lines = [f'{first} RIGHT', f'{first + 1} -']
+    for frame in range(first + 8, first + frames, 8):
+        jump = ' A' if (frame - first) % 64 < 16 else ''
+        lines += [f'{frame} B{jump}', f'{frame + 4}{jump or " -"}']
+    return lines
+
+
 def leave(chain, label):
     """Walking off the room's left edge takes its return door (area 8-15 tables)."""
     hold = chain.ram()[0x03D6] + 12
     chain.seg(f'{label}-leave', hold + 150, lambda f: [f'{f} LEFT', f'{f + hold} -'])
+    if chain.ram()[0x5E] & 0x80:
+        # UP flies as Bert. Wait for the original timer before checking a
+        # door or exit as Mark; never write the transformation flag.
+        chain.seg(f'{label}-bert-expiry', 3000)
+        if chain.ram()[0x5E] & 0x80:
+            raise SystemExit('Door audit needs Bert expiry; disable Endless Bert for this campaign')
 
 
 def return_point(chain, label, world_x, row, purpose, segmented=False):
@@ -180,7 +198,7 @@ def play_round(n, args, root):
             frames = 2400
         for k in range(args.fight_tries if encounter else 1):
             if n == 4 and d['param_6C'] == 1:
-                route = lambda f: sum(([f'{t} RIGHT B', f'{t+4} -'] for t in range(f, f+frames, 8)), [])
+                route = lambda f: reflect(f, frames)
             else:
                 route = lambda f: mash(f, frames)
             r = chain.seg(f'{label}-room{k}', frames, route)
@@ -286,12 +304,15 @@ def main():
     ap.add_argument('--output', type=Path, help='evidence root (default: evidence/coverage/TAG)')
     ap.add_argument('--exe', type=Path, default=mp_run.EXE)
     ap.add_argument('--widescreen', choices=('16:9', '21:9', '32:9', 'fit'))
+    ap.add_argument('--mods-root', type=Path, help='isolated mod catalog to validate')
+    ap.add_argument('--assist', help='override developer assists (empty for none)')
     args = ap.parse_args()
+    args.extra = ['--mods-root', str(args.mods_root.resolve())] if args.mods_root else []
     root = args.output.resolve() if args.output else ROOT / 'evidence' / 'coverage' / args.tag
     root.mkdir(parents=True, exist_ok=True)
     args.title_state = root / 'title-1000.cycstate'
     if not args.title_state.exists():
-        r = mp_run.run(root, 'title', 1000, route=TITLE_ROUTE, assist=None, exe=args.exe)
+        r = mp_run.run(root, 'title', 1000, route=TITLE_ROUTE, assist=None, exe=args.exe, extra=args.extra)
         shutil.copyfile(r['state'],args.title_state)
     summary = [play_round(n, args, root) for n in args.rounds]
     (root / f'summary-{"-".join(map(str, args.rounds))}.json').write_text(json.dumps(summary, indent=1) + '\n', newline='\n')

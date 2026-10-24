@@ -33,6 +33,20 @@ presentation.
 
 *Actual gameplay captures from this release.*
 
+## Cheats and restoration
+
+Open **Mods > Cheats** for invincibility, one-hit kills, Endless Bert,
+starting energy and round, walking speed, and jump height. Each cheat is optional
+and starts disabled.
+
+**Mods > Restoration > Prototype Restoration** adds Cubivore10's restored
+title-screen colors, monster artwork and scenery. Select it before starting the
+game; it works with widescreen, save states and rewind. Your ROM file stays
+unchanged. [Original patch and author credit](https://www.romhacking.net/hacks/1516/)
+([current archive](https://www.romhack.ing/hacks/1516/)).
+
+![Cubivore10's restored title screen](docs/images/prototype-restoration-title.png)
+
 ## Controls and progress
 
 Keyboard and controller bindings can be changed in the launcher.
@@ -68,8 +82,8 @@ A screenshot is helpful.
 If Linux reports that FUSE is unavailable, run the AppImage with:
 
 ```sh
-chmod +x MonsterParty-0.1.1-linux-x86_64.AppImage
-./MonsterParty-0.1.1-linux-x86_64.AppImage --appimage-extract-and-run
+chmod +x MonsterParty-0.1.2-linux-x86_64.AppImage
+./MonsterParty-0.1.2-linux-x86_64.AppImage --appimage-extract-and-run
 ```
 
 For source builds, see the [build guide](docs/BUILDING.md).
@@ -85,6 +99,8 @@ This is an unofficial fan project built with
 Project code uses the [PolyForm Noncommercial license](LICENSE.md).
 Third-party notices accompany the downloads. Box artwork is credited in
 [assets/SOURCE.txt](assets/SOURCE.txt).
+Cheat codes are credited to Galoob, Ugetab and megaman_exe in the included mod
+notices. Prototype Restoration 1.0 is by Cubivore10 and retains its own notice.
 
 ---
 

@@ -27,6 +27,13 @@ class Game:
         for name in ('assets', 'mods'):
             if (exe.parent / name).is_dir():
                 shutil.copytree(exe.parent / name, app / name, dirs_exist_ok=True)
+        # The window discovers its catalog beside the executable; --mods-root
+        # is the deterministic headless host's option. Keep this window's
+        # selected catalog isolated beside its copied runtime as well.
+        if '--mods-root' in extra:
+            index = extra.index('--mods-root')
+            shutil.copytree(Path(extra[index + 1]), app / 'mods', dirs_exist_ok=True)
+            extra = extra[:index] + extra[index + 2:]
         self.app = app
         config = self.out / 'config.ini'
         # Obsolete quick-slot bindings must not shadow the new defaults.
@@ -121,6 +128,8 @@ def run(args):
     extra = ['--interp-only'] if args.interp else []
     if args.widescreen:
         extra += ['--widescreen', '32:9']
+    if args.mods_root:
+        extra += ['--mods-root', str(args.mods_root.resolve())]
     game = Game(args.exe.resolve(), args.out, extra)
     results = {}
     try:
@@ -128,7 +137,7 @@ def run(args):
         # Load an observed stage fixture through the live window, not the CLI's
         # headless --load-state path. A rejected older fixture is a test failure,
         # never a requirement to add a backward-compatibility converter.
-        game.cmd('load_state', path=str(ROOT / 'evidence/rounds/round1-start.cycstate'))
+        game.cmd('load_state', path=str(args.fixture.resolve()))
         start = game.state()['frame']
         game.until(lambda s: s['frame'] > start + 100)
         game.key('F7')
@@ -252,4 +261,6 @@ if __name__ == '__main__':
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--interp', action='store_true')
     parser.add_argument('--widescreen', action='store_true')
+    parser.add_argument('--mods-root', type=Path)
+    parser.add_argument('--fixture', type=Path, default=ROOT / 'evidence/rounds/round1-start.cycstate')
     run(parser.parse_args())

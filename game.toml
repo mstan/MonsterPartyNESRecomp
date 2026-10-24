@@ -57,3 +57,28 @@ id = "monster-party.widescreen.cull64"
 addr = 0x8306
 length = 13
 crc32 = 0x76C76B35
+
+# Player cheats: bank 4 damage/Bert timer, bank 5 landed-hit paths.
+[[mod_function_hook]]
+id = "monster-party.cheat.invincible"
+addr = 0x879A
+length = 8
+crc32 = 0xE3B7FC6D
+
+[[mod_function_hook]]
+id = "monster-party.cheat.enemies"
+addr = 0x8502
+length = 8
+crc32 = 0xAA35CD08
+
+[[mod_function_hook]]
+id = "monster-party.cheat.guardians"
+addr = 0x8D22
+length = 8
+crc32 = 0xFC94C1CD
+
+[[mod_function_hook]]
+id = "monster-party.cheat.bert"
+addr = 0x804A
+length = 8
+crc32 = 0x3F2E6E3A

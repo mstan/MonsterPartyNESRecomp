@@ -25,13 +25,14 @@ Enemies appear across the wider view, and the stage camera stops at level edges.
 The life bar stays centered below the action, and boss rooms keep their centered
 presentation.
 
-![Round 1 in widescreen](docs/images/round1-widescreen.png)
+![Round 1 with Prototype Restoration and widescreen](docs/images/round1-widescreen.png)
 
-![Round 3 in widescreen](docs/images/round3-widescreen.png)
+![Round 3 with Prototype Restoration and widescreen](docs/images/round3-widescreen.png)
 
-![Round 8 in widescreen](docs/images/round8-widescreen.png)
+![Round 8 with Prototype Restoration and widescreen](docs/images/round8-widescreen.png)
 
-*Actual gameplay captures from this release.*
+*Actual gameplay with Adaptive Widescreen and Cubivore10's optional
+Prototype Restoration enabled.*
 
 ## Cheats and restoration
 
@@ -45,7 +46,9 @@ game; it works with widescreen, save states and rewind. Your ROM file stays
 unchanged. [Original patch and author credit](https://www.romhacking.net/hacks/1516/)
 ([current archive](https://www.romhack.ing/hacks/1516/)).
 
-![Cubivore10's restored title screen](docs/images/prototype-restoration-title.png)
+| Restored title screen | Restored plant boss |
+| :---: | :---: |
+| ![Cubivore10's restored title screen](docs/images/prototype-restoration-title.png) | ![Cubivore10's restored plant boss](docs/images/prototype-restoration-plant.png) |
 
 ## Controls and progress
 

@@ -15,6 +15,7 @@ def stage(build, output, version):
     shutil.copytree(ROOT / 'mods/preloaded/packages', output / 'mods/packages', dirs_exist_ok=True)
     notices = {
         'MonsterParty-LICENSE.md': ROOT / 'LICENSE.md',
+        'MonsterParty-PERMISSIONS.md': ROOT / 'PERMISSIONS.md',
         'NESRecomp-LICENSE.txt': ROOT / 'nesrecomp/LICENSE',
         'SDL2-COPYING.txt': ROOT / 'nesrecomp/runner/external/SDL2/COPYING.txt',
         'ImGui-LICENSE.txt': ROOT / 'recomp-ui/src/third_party/imgui/LICENSE.txt',

@@ -95,6 +95,16 @@ Development coverage and known limitations are in the
 
 ## Credits and license
 
+For this project's code covered by the [PolyForm Noncommercial License](LICENSE.md),
+[PERMISSIONS.md](PERMISSIONS.md) grants standing permission for voluntary
+donations, sponsorships, and advertising revenue, including support for broader
+development initiatives. Payment must not buy access to the software, games
+built with it, or their updates, features, or game content, including early access.
+
+Matthew Stanley has authority from the relevant copyright holders to grant
+these permissions for the project's PolyForm-covered code. Third-party
+components and code explicitly licensed under other terms retain those terms.
+
 Monster Party and its original artwork belong to their respective owners.
 This is an unofficial fan project built with
 [NESRecomp](https://github.com/mstan/nesrecomp) and
